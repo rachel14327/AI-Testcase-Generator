@@ -1,0 +1,81 @@
+# Misnamed / duplicate (use .gitignore only)
+/gitignore
+
+# Environment
+.env
+.env.local
+.env.*.local
+venv/
+.venv/
+env/
+**/venv/
+**/.venv/
+**/node_modules/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Node / frontend (node_modules also via **/ above)
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+test-case-generator/frontend/dist/
+test-case-generator/frontend/.vite/
+
+# Uploads & generated
+test-case-generator/backend/uploads/
+vector_store/
+*.pdf
+!**/data/raw/*.pdf
+
+# IDE & OS
+.idea/
+.vscode/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+
+# Logs & temp
+*.log
+.cache/
+tmp/
+temp/
+*.tmp
+
+# Secrets & config (if any)
+*.pem
+secrets/
+
+# ChromaDB / RAG / local DBs
+chroma/
+*.sqlite3
+*.db
+
+# Coverage & tests
+.coverage
+htmlcov/
+.pytest_cache/
+.tox/
+.nox/
