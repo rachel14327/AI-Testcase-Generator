@@ -1,0 +1,77 @@
+.app-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.75rem 1.5rem;
+  background: rgba(15, 23, 42, 0.9);
+  border-bottom: 1px solid rgba(71, 85, 105, 0.5);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.app-header-logo {
+  font-weight: 600;
+  font-size: 1.1rem;
+  color: #e2e8f0;
+  letter-spacing: -0.02em;
+}
+
+.app-header-logo:hover {
+  text-decoration: none;
+  color: #38bdf8;
+}
+
+.app-header-nav {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+}
+
+.app-header-right {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.app-header-user {
+  font-size: 0.95rem;
+  color: #cbd5e1;
+}
+
+.app-header-logout {
+  padding: 0.4rem 0.75rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #0f172a;
+  background: #94a3b8;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.app-header-logout:hover {
+  background: #cbd5e1;
+}
+
+.app-header-signin {
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: #38bdf8;
+}
+
+.app-header-signin:hover {
+  text-decoration: none;
+  color: #7dd3fc;
+}
+
+.app-header-link {
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: #cbd5e1;
+}
+
+.app-header-link:hover {
+  text-decoration: none;
+  color: #38bdf8;
+}

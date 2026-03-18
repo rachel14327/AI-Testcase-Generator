@@ -1,0 +1,25 @@
+# Dependencies & env (so IDE and Git both ignore)
+node_modules/
+venv/
+.venv/
+env/
+.env
+.env.local
+.env.*.local
+
+# Build & DB
+frontend/dist/
+backend/uploads/
+*.db
+*.sqlite3
+vector_store/
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+
+# IDE & OS
+.idea/
+.vscode/
+.DS_Store

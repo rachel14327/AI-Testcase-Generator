@@ -1,0 +1,154 @@
+.rag-page {
+  min-height: calc(100vh - 56px);
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 1.5rem;
+}
+
+.rag-card {
+  width: 100%;
+  max-width: 720px;
+  background: rgba(30, 41, 59, 0.8);
+  border: 1px solid rgba(71, 85, 105, 0.5);
+  border-radius: 16px;
+  padding: 2rem;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.4);
+}
+
+.rag-card h1 {
+  margin: 0 0 0.25rem 0;
+  font-size: 1.6rem;
+  font-weight: 600;
+}
+
+.rag-subtitle {
+  margin: 0 0 1.5rem 0;
+  color: #94a3b8;
+  font-size: 0.9rem;
+}
+
+.rag-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.rag-label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: #e2e8f0;
+}
+
+.rag-select {
+  padding: 0.6rem 0.75rem;
+  border-radius: 10px;
+  border: 1px solid rgba(71, 85, 105, 0.6);
+  background: rgba(15, 23, 42, 0.6);
+  color: #e2e8f0;
+  font-size: 0.95rem;
+}
+
+.rag-select:focus {
+  outline: none;
+  border-color: rgba(56, 189, 248, 0.7);
+}
+
+.rag-actions {
+  display: flex;
+  gap: 0.75rem;
+}
+
+.rag-btn {
+  padding: 0.6rem 1.25rem;
+  border-radius: 10px;
+  font-size: 0.95rem;
+  font-weight: 500;
+  cursor: pointer;
+  border: none;
+  transition: opacity 0.15s, background 0.15s;
+}
+
+.rag-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.rag-btn-primary {
+  background: #0ea5e9;
+  color: #fff;
+}
+
+.rag-btn-primary:hover:not(:disabled) {
+  background: #0284c7;
+}
+
+.rag-error {
+  padding: 0.75rem 1rem;
+  border-radius: 10px;
+  background: rgba(239, 68, 68, 0.15);
+  border: 1px solid rgba(239, 68, 68, 0.4);
+  color: #fca5a5;
+  margin-bottom: 1rem;
+}
+
+.rag-result {
+  margin-top: 1.5rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid rgba(71, 85, 105, 0.5);
+}
+
+.rag-result-title {
+  margin: 0 0 1rem 0;
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: #e2e8f0;
+}
+
+.rag-section {
+  margin-bottom: 1.25rem;
+}
+
+.rag-section h3 {
+  margin: 0 0 0.5rem 0;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #94a3b8;
+}
+
+.rag-text {
+  margin: 0;
+  font-size: 0.95rem;
+  line-height: 1.5;
+  color: #cbd5e1;
+}
+
+.rag-impact-list {
+  margin: 0;
+  padding-left: 1.25rem;
+  color: #cbd5e1;
+  line-height: 1.5;
+}
+
+.rag-impact-list li {
+  margin-bottom: 0.35rem;
+}
+
+.rag-pre {
+  margin: 0;
+  padding: 1rem;
+  border-radius: 10px;
+  background: rgba(15, 23, 42, 0.7);
+  border: 1px solid rgba(71, 85, 105, 0.4);
+  color: #e2e8f0;
+  font-size: 0.85rem;
+  line-height: 1.5;
+  white-space: pre-wrap;
+  word-break: break-word;
+  max-height: 24rem;
+  overflow-y: auto;
+}
