@@ -1,4 +1,4 @@
-from sqlalchemy import create_engine, inspect
+from sqlalchemy import create_engine, inspect, text
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 from core.config import get_settings
@@ -28,6 +28,21 @@ def get_db():
 def create_tables():
     """Create all tables. Import models (e.g. model.user) before calling so they are registered with Base."""
     Base.metadata.create_all(bind=engine)
+    # Add file_content column if it was added to Document model after table was created
+    try:
+        with engine.connect() as conn:
+            conn.execute(text("ALTER TABLE documents ADD COLUMN file_content BYTEA"))
+            conn.commit()
+    except Exception:
+        pass  # column likely already exists
+
+    # Add test_cases column for Features sheets
+    try:
+        with engine.connect() as conn:
+            conn.execute(text("ALTER TABLE features ADD COLUMN test_cases TEXT"))
+            conn.commit()
+    except Exception:
+        pass  # column likely already exists
 
 
 def get_table_names():

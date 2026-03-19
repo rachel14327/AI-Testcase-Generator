@@ -102,3 +102,53 @@ export async function processRag(documentId) {
   }
   return res.json()
 }
+
+export async function getFeatures() {
+  const token = getToken()
+  const res = await fetch(`${API_BASE}/api/v1/features`, {
+    headers: token ? { Authorization: `Bearer ${token}` } : {},
+  })
+
+  if (!res.ok) {
+    if (res.status === 401) throw new Error('Unauthorized')
+    throw new Error('Failed to load features')
+  }
+  return res.json()
+}
+
+export async function createFeature({ name, description, userId }) {
+  const token = getToken()
+  const res = await fetch(`${API_BASE}/api/v1/features/create-feature`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    },
+    body: JSON.stringify({
+      name,
+      description: description ?? null,
+      user_id: userId,
+    }),
+  })
+
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({ detail: res.statusText }))
+    throw new Error(err.detail || 'Create feature failed')
+  }
+  return res.json()
+}
+
+export async function deleteFeature(featureId) {
+  const token = getToken()
+  const res = await fetch(`${API_BASE}/api/v1/features/${featureId}`, {
+    method: 'DELETE',
+    headers: token ? { Authorization: `Bearer ${token}` } : {},
+  })
+
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({ detail: res.statusText }))
+    throw new Error(err.detail || 'Delete feature failed')
+  }
+
+  return res.json()
+}

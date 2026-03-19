@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, File, HTTPException, status
 from fastapi.datastructures import UploadFile
 from database.db import get_db
 from model.document import Document
-from model.schemas import UserResponse
+from model.schemas import DocumentResponse, UserResponse
 from sqlalchemy.orm import Session
 from services.documentService import documentService
 from util.protectedRoute import get_current_user
@@ -10,7 +10,7 @@ from util.protectedRoute import get_current_user
 uploadRouter = APIRouter()
 
 
-@uploadRouter.post("/upload")
+@uploadRouter.post("/upload", response_model=DocumentResponse)
 def upload_file(
     file: UploadFile = File(...),
     session: Session = Depends(get_db),

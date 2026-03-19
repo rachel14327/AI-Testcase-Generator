@@ -46,6 +46,13 @@ export default function LeftSidebar() {
     return () => { cancelled = true }
   }, [user])
 
+  // Expose the sidebar width to the rest of the UI so we can position
+  // "floating" panels without overlapping.
+  useEffect(() => {
+    const width = expanded ? '280px' : '44px'
+    document.documentElement.style.setProperty('--sidebar-width', width)
+  }, [expanded])
+
   if (!user) return null
 
   return (
