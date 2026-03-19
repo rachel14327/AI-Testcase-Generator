@@ -1,3 +1,12 @@
+---
+title: AI Testcase Generator
+emoji: 🧪
+colorFrom: blue
+colorTo: purple
+sdk: docker
+pinned: false
+---
+
 TestCraft — AI QA Analyst
 Turns feature documentation into test cases. Automatically.
 Most teams write test cases manually — reading through docs, cross-referencing other features, figuring out what might break. TestCraft does that work for you. Upload a PDF, get structured test cases back in seconds.
