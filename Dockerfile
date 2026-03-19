@@ -1,14 +1,14 @@
-FROM python:3.11-slim
+FROM python:3.9
+
+RUN useradd -m -u 1000 user
+USER user
+ENV PATH="/home/user/.local/bin:$PATH"
 
 WORKDIR /app
 
-COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+COPY --chown=user ./requirements.txt requirements.txt
+RUN pip install --no-cache-dir --upgrade -r requirements.txt
 
-COPY . .
+COPY --chown=user . /app
 
-EXPOSE 8000
-
-# Backend entrypoint is in test-case-generator/backend/main.py
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000", "--app-dir", "test-case-generator/backend"]
-
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "7860"]
