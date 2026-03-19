@@ -4,11 +4,17 @@ RUN useradd -m -u 1000 user
 USER user
 ENV PATH="/home/user/.local/bin:$PATH"
 
-WORKDIR /app
+WORKDIR /app/test-case-generator/backend
 
-COPY --chown=user ./requirements.txt requirements.txt
-RUN pip install --no-cache-dir --upgrade -r requirements.txt
+COPY --chown=user ./requirements.txt /app/requirements.txt
+RUN pip install --no-cache-dir --upgrade -r /app/requirements.txt
 
 COPY --chown=user . /app
 
-CMD ["uvicorn", "test-case-generator.backend.main:app", "--host", "0.0.0.0", "--port", "7860"]
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "7860"]
+```
+
+Key change:
+```
+WORKDIR /app/test-case-generator/backend  ← run FROM the backend folder
+CMD uvicorn main:app                       ← now finds main.py directly
