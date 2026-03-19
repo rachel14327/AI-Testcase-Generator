@@ -1,0 +1,20 @@
+__pycache__
+*.pyc
+*.pyo
+.env
+.git
+.gitignore
+node_modules
+*.egg-info
+.pytest_cache
+.venv
+venv
+*.log
+
+# Frontend build artifacts / local caches
+test-case-generator/frontend/dist
+
+# Local backend persisted data (can be regenerated / should be mounted)
+test-case-generator/backend/vector_store
+test-case-generator/backend/uploads
+
