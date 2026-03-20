@@ -1,4 +1,4 @@
-const API_BASE = ''
+const API_BASE = 'https://salwantanya-ai-testcase-generator.hf.space'
 
 function getToken() {
   return localStorage.getItem('access_token')
