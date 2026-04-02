@@ -307,46 +307,71 @@ def _impact_analysis(rag: SessionRAG, col: str, new_summary: str) -> dict:
 # ── LLM Step 3: Generate test cases ───────────────────────────────────────────
 
 _TC_PROMPT_CLEAN = """<s>[INST]
-You are a senior QA analyst. Generate comprehensive test cases for the feature below.
+You are a senior QA analyst with 10 years of experience. Your test cases must be specific, actionable, and directly derived from the documentation provided. Generic test cases are not acceptable.
 
 Feature summary:
 {summary}
 
-Feature documentation:
+Full feature documentation (read every word carefully):
 {context}
 
-Instructions:
-- Format: TC ID | Title | Precondition | Steps | Expected Result | Priority
-- Cover: happy path, negative cases, edge cases, boundary values, UI/UX checks, error handling
-- Number as TC-001, TC-002, etc.
-- Be specific — use actual field names, values, and flows from the documentation
-- Minimum 10 test cases
+STRICT RULES:
+1. Every test case MUST reference actual field names, button labels, API names, status values, or business rules mentioned in the documentation above. Do NOT invent generic steps.
+2. If the doc mentions specific statuses (e.g. "Pending", "Prepared"), use those exact values.
+3. If the doc mentions specific APIs, services, or integrations, write test cases that validate those.
+4. If the doc mentions specific UI elements, include them in the steps.
+5. Steps must be granular — each step is one specific action, not a vague summary.
+6. Expected results must be precise — state exactly what should appear, change, or be returned.
+7. Do NOT write test cases like "verify the feature works correctly" — that is useless.
+8. Minimum 15 test cases.
+
+Categories to cover (derive all from the actual documentation):
+- Core happy path flows (step by step, using actual field names)
+- Each business rule mentioned in the doc as a separate test case
+- Each API or service integration mentioned
+- Each status transition mentioned
+- UI element validation (labels, buttons, icons mentioned in doc)
+- Error states and validation messages
+- Permission and access control if mentioned
+- Edge cases specific to this feature (not generic edge cases)
+- Data integrity checks
+
+Format each test case EXACTLY like this:
+TC-001 | [Specific title referencing actual feature name/flow] | [Specific precondition] | [Numbered granular steps] | [Precise expected result] | [High/Medium/Low]
+
+Output ONLY the test cases, no preamble or explanation.
 [/INST]"""
 
 _TC_PROMPT_WITH_IMPACT = """<s>[INST]
-You are a senior QA analyst. The new feature below has an impact on previously tested features.
-Generate test cases for the new feature AND regression/integration test cases for the impacted ones.
+You are a senior QA analyst with 10 years of experience. Your test cases must be specific, actionable, and directly derived from the documentation. Generic test cases are not acceptable.
 
 NEW FEATURE summary:
 {summary}
 
-New feature documentation:
+New feature documentation (read every word carefully):
 {context}
 
 IMPACTED PREVIOUS FEATURES (with their existing test cases):
 {impact_section}
 
-Instructions:
-- Section 1 — ## New Feature Test Cases
-  Format: TC ID | Title | Precondition | Steps | Expected Result | Priority
-  Number as TC-001, TC-002...
-  Minimum 10 test cases, cover happy path, negatives, edge cases
+STRICT RULES:
+1. Every test case MUST reference actual field names, API names, status values, or business rules from the documentation. Do NOT invent generic steps.
+2. Steps must be granular — each step is one specific action.
+3. Expected results must be precise — state exactly what appears, changes, or is returned.
+4. For regression test cases, explain exactly HOW the new feature could break the old one.
+5. Minimum 15 new feature test cases, minimum 5 regression test cases per impacted feature.
 
-- Section 2 — ## Regression / Impact Test Cases
-  Format: RTC ID | Title | Feature | Precondition | Steps | Expected Result | Priority
-  Number as RTC-001, RTC-002...
-  Only include test cases directly affected by the new feature
-  Clearly state which previous feature each RTC belongs to
+## New Feature Test Cases
+Cover: core flows, each business rule, each API/integration, status transitions, UI elements, error states, permissions, edge cases specific to this feature.
+
+Format: TC-001 | [Specific title] | [Specific precondition] | [Numbered granular steps] | [Precise expected result] | [High/Medium/Low]
+
+## Regression / Impact Test Cases
+For each impacted feature, write test cases that validate the integration point between old and new feature.
+
+Format: RTC-001 | [Specific title] | [Feature name] | [Specific precondition] | [Numbered granular steps] | [Precise expected result] | [High/Medium/Low]
+
+Output ONLY the test cases, no preamble or explanation.
 [/INST]"""
 
 
@@ -356,8 +381,23 @@ def _generate_test_cases(
     summary: str,
     impact: dict,
 ) -> str:
-    docs = rag.retrieve_from(col, query="feature functionality user flow steps", k=10)
-    context = _docs_to_text(docs, max_chars=5000)
+    # Use multiple targeted queries to get richer context from the doc
+    queries = [
+        "feature functionality user flow steps",
+        "API integration service endpoints",
+        "business rules validation error handling",
+        "UI elements fields buttons status values",
+        "data entities permissions access control",
+    ]
+    seen = set()
+    all_docs = []
+    for q in queries:
+        for d in rag.retrieve_from(col, query=q, k=6):
+            key = d.page_content[:100]
+            if key not in seen:
+                seen.add(key)
+                all_docs.append(d)
+    context = _docs_to_text(all_docs, max_chars=6000)
 
     if not impact.get("has_impact"):
         prompt = _TC_PROMPT_CLEAN.format(summary=summary, context=context)

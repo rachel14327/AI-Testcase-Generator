@@ -62,7 +62,7 @@ class FeatureResponse(BaseModel):
         from_attributes = True
 class DocumentRequest(BaseModel):
     file: UploadFile
-    feature_name: Union[str, None] = None 
+    feature_name: str
     class Config:
         from_attributes = True
 class FeatureRequest(BaseModel):
@@ -71,6 +71,12 @@ class FeatureRequest(BaseModel):
     user_id: int
     class Config:
         from_attributes = True 
+
+class ProcessRagRequest(BaseModel):
+    document_id: int
+    feature_name: str
+    class Config:
+        from_attributes = True
 
 
 class TestcaseResponse(BaseModel):

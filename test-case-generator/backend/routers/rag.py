@@ -7,12 +7,13 @@ from pydantic import BaseModel
 
 from database.db import get_db
 from model.document import Document
-from model.schemas import UserResponse
+from model.schemas import FeatureRequest, ProcessRagRequest, UserResponse
+from model.document import Feature
 from util.protectedRoute import get_current_user
 
 ragRouter = APIRouter()
 logger = logging.getLogger(__name__)
-
+    
 # Per-user RAG sessions (in-memory). SessionRAG imported lazily when first used.
 _rag_sessions: dict = {}
 
@@ -25,10 +26,6 @@ def _get_or_create_rag(user_id: int):
     return _rag_sessions[key]
 
 
-class ProcessRagRequest(BaseModel):
-    document_id: int
-
-
 @ragRouter.post("/process")
 def process_rag(
     body: ProcessRagRequest,
@@ -37,16 +34,17 @@ def process_rag(
 ):
     """Run RAG pipeline on an uploaded document (PDF). Returns summary, impact, and test cases."""
     doc = session.query(Document).filter(Document.id == body.document_id).first()
+    feature = session.query(Feature).filter(Feature.name == body.feature_name, Feature.user_id == current_user.id).first()
     if not doc:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Document not found")
     if doc.user_id is not None and doc.user_id != current_user.id:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not your document")
 
     display_name = doc.file_name or "document.pdf"
-    if not display_name.lower().endswith(".pdf"):
+    if not display_name.lower().endswith(".pdf") or feature is None:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="RAG supports PDF only",
+            detail="RAG supports PDF only or feature not found",
         )
 
     # Use file content from DB, or legacy file_path on disk
