@@ -1,4 +1,4 @@
-const API_BASE = 'https://salwantanya-ai-testcase-generator.hf.space'
+const API_BASE = import.meta.env.VITE_API_BASE ?? 'https://salwantanya-ai-testcase-generator.hf.space'
 
 function getToken() {
   return localStorage.getItem('access_token')
@@ -86,7 +86,7 @@ export async function deleteDocument(documentId) {
   return res.json()
 }
 
-export async function processRag(documentId) {
+export async function processRag(documentId, featureName) {
   const token = getToken()
   const res = await fetch(`${API_BASE}/api/v1/rag/process`, {
     method: 'POST',
@@ -94,11 +94,12 @@ export async function processRag(documentId) {
       'Content-Type': 'application/json',
       ...(token ? { Authorization: `Bearer ${token}` } : {}),
     },
-    body: JSON.stringify({ document_id: documentId }),
+    body: JSON.stringify({ document_id: documentId, feature_name: featureName }),
   })
   if (!res.ok) {
     const err = await res.json().catch(() => ({ detail: res.statusText }))
-    throw new Error(err.detail || 'RAG processing failed')
+    const detail = Array.isArray(err.detail) ? err.detail.map((e) => e.msg).join(', ') : err.detail
+    throw new Error(detail || 'RAG processing failed')
   }
   return res.json()
 }
@@ -134,6 +135,36 @@ export async function createFeature({ name, description, userId }) {
   if (!res.ok) {
     const err = await res.json().catch(() => ({ detail: res.statusText }))
     throw new Error(err.detail || 'Create feature failed')
+  }
+  return res.json()
+}
+
+export async function addTestcase(featureId, testcase) {
+  const token = getToken()
+  const res = await fetch(`${API_BASE}/api/v1/features/${featureId}/add-testcase`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    },
+    body: JSON.stringify({ testcase }),
+  })
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({ detail: res.statusText }))
+    const detail = Array.isArray(err.detail) ? err.detail.map((e) => e.msg).join(', ') : err.detail
+    throw new Error(detail || 'Failed to add testcase')
+  }
+  return res.json()
+}
+
+export async function getFeatureTestcases(featureId) {
+  const token = getToken()
+  const res = await fetch(`${API_BASE}/api/v1/features/${featureId}/testcases`, {
+    headers: token ? { Authorization: `Bearer ${token}` } : {},
+  })
+  if (!res.ok) {
+    if (res.status === 401) throw new Error('Unauthorized')
+    throw new Error('Failed to load testcases')
   }
   return res.json()
 }

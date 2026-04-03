@@ -10,6 +10,7 @@ export default function Rag() {
   const location = useLocation()
   const [documents, setDocuments] = useState([])
   const [selectedId, setSelectedId] = useState('')
+  const [featureName, setFeatureName] = useState('')
   const [loadingDocs, setLoadingDocs] = useState(true)
   const [processing, setProcessing] = useState(false)
   const [error, setError] = useState(null)
@@ -56,7 +57,7 @@ export default function Rag() {
     setError(null)
     setResult(null)
     try {
-      const data = await processRag(id)
+      const data = await processRag(id, featureName.trim())
       setResult(data)
     } catch (err) {
       setError(err.message || 'RAG processing failed')
@@ -91,6 +92,17 @@ export default function Rag() {
                 </option>
               ))}
             </select>
+          </label>
+
+          <label className="rag-label">
+            Feature name
+            <input
+              className="rag-input"
+              value={featureName}
+              onChange={(e) => setFeatureName(e.target.value)}
+              placeholder="e.g. Login with email"
+              disabled={processing}
+            />
           </label>
 
           <div className="rag-actions">

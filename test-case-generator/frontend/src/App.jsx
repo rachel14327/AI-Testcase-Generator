@@ -8,6 +8,7 @@ import Protected from './pages/Protected'
 import Upload from './pages/Upload'
 import Rag from './pages/Rag'
 import Features from './pages/Features'
+import FeatureTestcases from './pages/FeatureTestcases'
 
 function App() {
   return (
@@ -22,6 +23,7 @@ function App() {
         <Route path="/upload" element={<Upload />} />
         <Route path="/rag" element={<Rag />} />
         <Route path="/features" element={<Features />} />
+        <Route path="/features/:featureId" element={<FeatureTestcases />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </>

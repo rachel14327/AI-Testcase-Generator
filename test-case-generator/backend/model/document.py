@@ -30,6 +30,7 @@ class Testcase(Base):
     __tablename__ = "testcases"
 
     id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False, index=True)
     feature_id = Column(Integer, ForeignKey("features.id"), nullable=True, index=True)
     name = Column(Text, nullable=True)
     description = Column(Text, nullable=True)

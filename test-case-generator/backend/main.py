@@ -1,6 +1,7 @@
 import logging
 from contextlib import asynccontextmanager
 from fastapi import Depends, FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.exc import OperationalError  # type: ignore[import-untyped]
 from core.config import get_settings
 from database.db import create_tables, get_table_names, get_table_columns
@@ -11,7 +12,7 @@ from routers.auth import authRouter
 from routers.rag import ragRouter
 from routers.upload import uploadRouter
 from routers.features import featuresRouter
-from routers.CreateFeatures import createFeaturesRouter
+from routers.testcases import testcasesRouter
 from util.protectedRoute import get_current_user
 logger = logging.getLogger(__name__)
 settings = get_settings()
@@ -31,11 +32,18 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(title=settings.APP_NAME, debug=settings.DEBUG, lifespan=lifespan)
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=settings.CORS_ORIGINS,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 app.include_router(authRouter, prefix="/api/v1/auth", tags=["auth"])
 app.include_router(uploadRouter, prefix="/api/v1/upload", tags=["upload"])
 app.include_router(ragRouter, prefix="/api/v1/rag", tags=["rag"])
 app.include_router(featuresRouter, prefix="/api/v1", tags=["features"])
-app.include_router(createFeaturesRouter, prefix="/api/v1/features", tags=["features"])
+app.include_router(testcasesRouter, prefix="/api/v1", tags=["testcases"])
 
 
 @app.get("/health")

@@ -117,3 +117,24 @@ class createFeatureResponse(BaseModel):
     description: Optional[str] = None  
     class Config:
         from_attributes = True
+
+
+class AlltestcasesPerFeatureResponse(BaseModel):
+    feature_id: int
+    test_cases: list[TestcaseResponse]
+    class Config:
+        from_attributes = True
+
+
+class addTestcaseRequest(BaseModel):
+    testcase: str
+
+    class Config:
+        from_attributes = True
+
+class addTestcaseResponse(BaseModel):
+    feature_id: int
+    name: str
+
+    class Config:
+        from_attributes = True
