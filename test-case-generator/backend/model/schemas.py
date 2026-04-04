@@ -138,3 +138,11 @@ class addTestcaseResponse(BaseModel):
 
     class Config:
         from_attributes = True
+    
+
+class deteleTestcaseResponse(BaseModel):
+    feature_id: int
+    name: str
+
+    class Config:
+        from_attributes = True

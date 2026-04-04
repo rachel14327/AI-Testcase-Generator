@@ -1,6 +1,6 @@
 from fastapi import HTTPException
 from sqlalchemy.orm import Session
-from model.schemas import TestcaseResponse, addTestcaseResponse, addTestcaseRequest
+from model.schemas import TestcaseResponse, addTestcaseResponse, addTestcaseRequest, deteleTestcaseResponse
 from model.document import Testcase
 from typing import List
 
@@ -20,4 +20,16 @@ class testcasesService:
         self.session.add(testcase)
         self.session.commit()
         self.session.refresh(testcase)
+        return testcase
+
+    def detele_testcase(self, user_id: int, feature_id: int, testcase_id: int) -> deteleTestcaseResponse:
+        testcase = self.session.query(Testcase).filter(
+            Testcase.id == testcase_id,
+            Testcase.feature_id == feature_id,
+            Testcase.user_id == user_id,
+        ).first()
+        if not testcase:
+            raise HTTPException(status_code=404, detail="Testcase not found")
+        self.session.delete(testcase)
+        self.session.commit()
         return testcase

@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { createFeature, deleteFeature, getFeatures } from '../api/client'
-
 import { useAuth } from '../context/AuthContext'
 import './Features.css'
 
@@ -17,6 +16,7 @@ export default function Features() {
   const [name, setName] = useState('')
   const [description, setDescription] = useState('')
   const [creating, setCreating] = useState(false)
+  const [showForm, setShowForm] = useState(false)
 
   async function load() {
     if (!token) return
@@ -44,24 +44,14 @@ export default function Features() {
 
   async function onSubmit(e) {
     e.preventDefault()
-    if (!token) {
-      navigate('/login', { replace: true })
-      return
-    }
-    if (!name.trim()) {
-      setError('Feature name is required')
-      return
-    }
+    if (!name.trim()) { setError('Feature name is required'); return }
     setCreating(true)
     setError(null)
     try {
-      await createFeature({
-        name: name.trim(),
-        description: description.trim() ? description.trim() : null,
-        userId: user?.id,
-      })
+      await createFeature({ name: name.trim(), description: description.trim() || null, userId: user?.id })
       setName('')
       setDescription('')
+      setShowForm(false)
       await load()
     } catch (e) {
       setError(e.message || 'Create feature failed')
@@ -71,16 +61,10 @@ export default function Features() {
   }
 
   async function onDeleteFeature(featureId) {
-    if (!token) {
-      navigate('/login', { replace: true })
-      return
-    }
     if (deletingId) return
     const feature = items.find((f) => f.id === featureId)
     const label = feature?.name ? ` "${feature.name}"` : ''
-    const ok = window.confirm(`Delete this feature${label}? This will remove it from the database.`)
-    if (!ok) return
-
+    if (!window.confirm(`Delete${label}? This cannot be undone.`)) return
     setDeletingId(featureId)
     setError(null)
     try {
@@ -96,29 +80,37 @@ export default function Features() {
   if (!user) return null
 
   return (
-    <div className="features-page">
-      <div className="features-card">
-        <h1>Features</h1>
-        <p className="features-subtitle">Manage your features for test case generation.</p>
+    <div className="feat-page">
+      <div className="feat-header">
+        <div>
+          <h1 className="feat-title">Features</h1>
+          <p className="feat-subtitle">Manage your features for test case generation.</p>
+        </div>
+        <button className="feat-add-btn" onClick={() => setShowForm((v) => !v)}>
+          + New Feature
+        </button>
+      </div>
 
-        {error && <div className="features-error">{error}</div>}
+      {error && <div className="feat-error">{error}</div>}
 
-        <form className="features-form" onSubmit={onSubmit}>
-          <label className="features-label">
+      {showForm && (
+        <form className="feat-form" onSubmit={onSubmit}>
+          <h3 className="feat-form-title">New Feature</h3>
+          <label className="feat-label">
             Feature name
             <input
-              className="features-input"
+              className="feat-input"
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="e.g. Login with email"
               disabled={creating}
+              autoFocus
             />
           </label>
-
-          <label className="features-label">
-            Description (optional)
+          <label className="feat-label">
+            Description <span className="feat-optional">(optional)</span>
             <textarea
-              className="features-textarea"
+              className="feat-textarea"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               placeholder="Short description for context"
@@ -126,42 +118,54 @@ export default function Features() {
               disabled={creating}
             />
           </label>
-
-          <div className="features-actions">
-            <button type="submit" className="features-btn features-btn-primary" disabled={creating}>
-              {creating ? 'Creating…' : 'Create feature'}
+          <div className="feat-form-actions">
+            <button type="submit" className="feat-submit-btn" disabled={creating}>
+              {creating ? 'Creating…' : 'Create Feature'}
+            </button>
+            <button type="button" className="feat-cancel-btn" onClick={() => { setShowForm(false); setName(''); setDescription('') }}>
+              Cancel
             </button>
           </div>
         </form>
+      )}
 
-        <div className="features-list">
-          {loading ? (
-            <div className="features-loading">Loading…</div>
-          ) : items.length === 0 ? (
-            <div className="features-empty">No features yet.</div>
-          ) : (
-            <ul className="features-ul">
-              {items.map((f) => (
-                <li key={f.id} className="features-li" onClick={() => navigate(`/features/${f.id}`)} style={{ cursor: 'pointer' }}>
-                  <div className="features-li-main">
-                    <div className="features-li-title">{f.name}</div>
-                    {f.description && <div className="features-li-desc">{f.description}</div>}
-                  </div>
-                  <button
-                    type="button"
-                    className="features-delete-btn"
-                    onClick={(e) => { e.stopPropagation(); onDeleteFeature(f.id) }}
-                    disabled={deletingId === f.id}
-                  >
-                    {deletingId === f.id ? 'Deleting…' : 'Delete'}
-                  </button>
-                </li>
-              ))}
-            </ul>
-          )}
-        </div>
+      <div className="feat-table-wrap">
+        <table className="feat-table">
+          <thead>
+            <tr>
+              <th className="feat-th feat-th-id">ID</th>
+              <th className="feat-th">Name</th>
+              <th className="feat-th">Description</th>
+              <th className="feat-th feat-th-actions"></th>
+            </tr>
+          </thead>
+          <tbody>
+            {loading ? (
+              <tr><td colSpan={4} className="feat-td-empty">Loading…</td></tr>
+            ) : items.length === 0 ? (
+              <tr><td colSpan={4} className="feat-td-empty">No features yet. Click "+ New Feature" to create one.</td></tr>
+            ) : (
+              items.map((f) => (
+                <tr key={f.id} className="feat-row" onClick={() => navigate(`/features/${f.id}`)}>
+                  <td className="feat-td feat-td-id">F{f.id}</td>
+                  <td className="feat-td feat-td-name">{f.name}</td>
+                  <td className="feat-td feat-td-desc">{f.description || <span className="feat-no-desc">—</span>}</td>
+                  <td className="feat-td feat-td-actions" onClick={(e) => e.stopPropagation()}>
+                    <button
+                      type="button"
+                      className="feat-delete-btn"
+                      onClick={() => onDeleteFeature(f.id)}
+                      disabled={deletingId === f.id}
+                    >
+                      {deletingId === f.id ? '…' : 'Delete'}
+                    </button>
+                  </td>
+                </tr>
+              ))
+            )}
+          </tbody>
+        </table>
       </div>
     </div>
   )
 }
-

@@ -139,6 +139,20 @@ export async function createFeature({ name, description, userId }) {
   return res.json()
 }
 
+export async function deleteTestcase(featureId, testcaseId) {
+  const token = getToken()
+  const res = await fetch(`${API_BASE}/api/v1/features/${featureId}/testcases/${testcaseId}`, {
+    method: 'DELETE',
+    headers: token ? { Authorization: `Bearer ${token}` } : {},
+  })
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({ detail: res.statusText }))
+    const detail = Array.isArray(err.detail) ? err.detail.map((e) => e.msg).join(', ') : err.detail
+    throw new Error(detail || 'Failed to delete testcase')
+  }
+  return res.json()
+}
+
 export async function addTestcase(featureId, testcase) {
   const token = getToken()
   const res = await fetch(`${API_BASE}/api/v1/features/${featureId}/add-testcase`, {

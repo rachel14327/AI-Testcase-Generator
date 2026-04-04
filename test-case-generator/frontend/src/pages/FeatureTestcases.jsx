@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
-import { addTestcase, getFeatureTestcases } from '../api/client'
+import { addTestcase, deleteTestcase, getFeatureTestcases } from '../api/client'
 import { useAuth } from '../context/AuthContext'
 import './FeatureTestcases.css'
 
@@ -16,6 +16,8 @@ export default function FeatureTestcases() {
   const [testcaseInput, setTestcaseInput] = useState('')
   const [adding, setAdding] = useState(false)
   const [addError, setAddError] = useState(null)
+  const [deletingId, setDeletingId] = useState(null)
+  const [showForm, setShowForm] = useState(false)
 
   async function load() {
     setLoading(true)
@@ -39,6 +41,19 @@ export default function FeatureTestcases() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [featureId, token, navigate])
 
+  async function onDeleteTestcase(testcaseId) {
+    if (deletingId) return
+    setDeletingId(testcaseId)
+    try {
+      await deleteTestcase(featureId, testcaseId)
+      setTestcases((prev) => prev.filter((tc) => tc.id !== testcaseId))
+    } catch (e) {
+      setError(e.message || 'Failed to delete testcase')
+    } finally {
+      setDeletingId(null)
+    }
+  }
+
   async function onAddTestcase(e) {
     e.preventDefault()
     if (!testcaseInput.trim()) return
@@ -47,6 +62,7 @@ export default function FeatureTestcases() {
     try {
       await addTestcase(featureId, testcaseInput.trim())
       setTestcaseInput('')
+      setShowForm(false)
       await load()
     } catch (e) {
       setAddError(e.message || 'Failed to add testcase')
@@ -59,45 +75,89 @@ export default function FeatureTestcases() {
 
   return (
     <div className="ftc-page">
-      <div className="ftc-card">
+      <div className="ftc-header">
         <button className="ftc-back" onClick={() => navigate('/features')}>
-          ← Back to Features
+          ← Features
         </button>
+        <div className="ftc-header-right">
+          <span className="ftc-count">{testcases.length} test case{testcases.length !== 1 ? 's' : ''}</span>
+          <button className="ftc-add-btn" onClick={() => setShowForm((v) => !v)}>
+            + Add Test Case
+          </button>
+        </div>
+      </div>
 
+      <div className="ftc-title-row">
         <h1 className="ftc-title">Test Cases</h1>
-        <p className="ftc-subtitle">All test cases for this feature.</p>
+        <span className="ftc-feature-badge">Feature #{featureId}</span>
+      </div>
 
-        <form className="ftc-form" onSubmit={onAddTestcase}>
+      {showForm && (
+        <form className="ftc-inline-form" onSubmit={onAddTestcase}>
           <input
             className="ftc-input"
             value={testcaseInput}
             onChange={(e) => setTestcaseInput(e.target.value)}
-            placeholder="Enter a test case..."
+            placeholder="Enter test case title..."
             disabled={adding}
+            autoFocus
           />
-          <button type="submit" className="ftc-add-btn" disabled={adding || !testcaseInput.trim()}>
-            {adding ? 'Adding…' : 'Add'}
-          </button>
+          <div className="ftc-form-actions">
+            <button type="submit" className="ftc-submit-btn" disabled={adding || !testcaseInput.trim()}>
+              {adding ? 'Adding…' : 'Add Test Case'}
+            </button>
+            <button type="button" className="ftc-cancel-btn" onClick={() => { setShowForm(false); setTestcaseInput('') }}>
+              Cancel
+            </button>
+          </div>
+          {addError && <div className="ftc-error">{addError}</div>}
         </form>
-        {addError && <div className="ftc-error">{addError}</div>}
+      )}
 
-        {error && <div className="ftc-error">{error}</div>}
+      {error && <div className="ftc-error">{error}</div>}
 
-        {loading ? (
-          <div className="ftc-loading">Loading…</div>
-        ) : testcases.length === 0 ? (
-          <div className="ftc-empty">No test cases found for this feature.</div>
-        ) : (
-          <ul className="ftc-list">
-            {testcases.map((tc, i) => (
-              <li key={tc.id ?? i} className="ftc-item">
-                <div className="ftc-item-title">{tc.name ?? tc.testcase ?? `Test Case ${i + 1}`}</div>
-                {tc.description && <div className="ftc-item-desc">{tc.description}</div>}
-                {tc.steps && <div className="ftc-item-steps">{tc.steps}</div>}
-              </li>
-            ))}
-          </ul>
-        )}
+      <div className="ftc-table-wrap">
+        <table className="ftc-table">
+          <thead>
+            <tr>
+              <th className="ftc-th ftc-th-id">ID</th>
+              <th className="ftc-th">Title</th>
+              <th className="ftc-th ftc-th-status">Status</th>
+              <th className="ftc-th ftc-th-actions"></th>
+            </tr>
+          </thead>
+          <tbody>
+            {loading ? (
+              <tr>
+                <td colSpan={4} className="ftc-td-empty">Loading…</td>
+              </tr>
+            ) : testcases.length === 0 ? (
+              <tr>
+                <td colSpan={4} className="ftc-td-empty">No test cases yet. Click "+ Add Test Case" to create one.</td>
+              </tr>
+            ) : (
+              testcases.map((tc, i) => (
+                <tr key={tc.id ?? i} className="ftc-row">
+                  <td className="ftc-td ftc-td-id">C{tc.id ?? i + 1}</td>
+                  <td className="ftc-td ftc-td-title">{tc.name ?? tc.testcase ?? `Test Case ${i + 1}`}</td>
+                  <td className="ftc-td">
+                    <span className="ftc-status ftc-status-untested">Untested</span>
+                  </td>
+                  <td className="ftc-td ftc-td-actions">
+                    <button
+                      type="button"
+                      className="ftc-delete-btn"
+                      onClick={() => onDeleteTestcase(tc.id)}
+                      disabled={deletingId === tc.id}
+                    >
+                      {deletingId === tc.id ? '…' : 'Delete'}
+                    </button>
+                  </td>
+                </tr>
+              ))
+            )}
+          </tbody>
+        </table>
       </div>
     </div>
   )
