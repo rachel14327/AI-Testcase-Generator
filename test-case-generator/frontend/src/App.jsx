@@ -9,6 +9,7 @@ import Upload from './pages/Upload'
 import Rag from './pages/Rag'
 import Features from './pages/Features'
 import FeatureTestcases from './pages/FeatureTestcases'
+import TestcaseDetail from './pages/TestcaseDetail'
 
 function App() {
   return (
@@ -24,6 +25,7 @@ function App() {
         <Route path="/rag" element={<Rag />} />
         <Route path="/features" element={<Features />} />
         <Route path="/features/:featureId" element={<FeatureTestcases />} />
+        <Route path="/features/:featureId/testcases/:testcaseId" element={<TestcaseDetail />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </>

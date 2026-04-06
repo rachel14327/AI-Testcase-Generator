@@ -128,6 +128,7 @@ class AlltestcasesPerFeatureResponse(BaseModel):
 
 class addTestcaseRequest(BaseModel):
     testcase: str
+    status: str = "untested"
 
     class Config:
         from_attributes = True
@@ -135,6 +136,7 @@ class addTestcaseRequest(BaseModel):
 class addTestcaseResponse(BaseModel):
     feature_id: int
     name: str
+    status: str
 
     class Config:
         from_attributes = True
@@ -146,3 +148,43 @@ class deteleTestcaseResponse(BaseModel):
 
     class Config:
         from_attributes = True
+
+class updateTestcaseStatusRequest(BaseModel):
+    status: str  # "passed", "failed", "blocked", "untested"
+
+class updateTestcaseStatusResponse(BaseModel):
+    id: int
+    status: str
+
+    class Config:
+        from_attributes = True
+
+class getTestcaseDescriptionResponse(BaseModel):
+    id: int
+    feature_id: int
+    name: str
+    status: str
+    description: Optional[str] = None
+    steps: Optional[str] = None
+    expected_result: Optional[str] = None
+    priority: Optional[str] = None
+
+    class Config:
+        from_attributes = True
+
+class updateDesriptionResponse(BaseModel):
+    id: int
+    feature_id: int
+
+    class Config:
+        from_attributes = True
+
+class updateDesriptionRequest(BaseModel):
+    name: str
+    status: str
+    description: Optional[str] = None
+    steps: Optional[str] = None
+    expected_result: Optional[str] = None
+
+    class Config:
+        from_attributes = True  

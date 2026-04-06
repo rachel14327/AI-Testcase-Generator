@@ -139,6 +139,52 @@ export async function createFeature({ name, description, userId }) {
   return res.json()
 }
 
+export async function updateTestcaseDescription(featureId, testcaseId, body) {
+  const token = getToken()
+  const res = await fetch(`${API_BASE}/api/v1/features/${featureId}/testcases/${testcaseId}/description`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    },
+    body: JSON.stringify(body),
+  })
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({ detail: res.statusText }))
+    throw new Error(err.detail || 'Failed to update testcase')
+  }
+  return res.json()
+}
+
+export async function getTestcaseDescription(featureId, testcaseId) {
+  const token = getToken()
+  const res = await fetch(`${API_BASE}/api/v1/features/${featureId}/testcases/${testcaseId}/description`, {
+    headers: token ? { Authorization: `Bearer ${token}` } : {},
+  })
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({ detail: res.statusText }))
+    throw new Error(err.detail || 'Failed to load testcase')
+  }
+  return res.json()
+}
+
+export async function updateTestcaseStatus(featureId, testcaseId, status) {
+  const token = getToken()
+  const res = await fetch(`${API_BASE}/api/v1/features/${featureId}/testcases/${testcaseId}/status`, {
+    method: 'PATCH',
+    headers: {
+      'Content-Type': 'application/json',
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    },
+    body: JSON.stringify({ status }),
+  })
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({ detail: res.statusText }))
+    throw new Error(err.detail || 'Failed to update status')
+  }
+  return res.json()
+}
+
 export async function deleteTestcase(featureId, testcaseId) {
   const token = getToken()
   const res = await fetch(`${API_BASE}/api/v1/features/${featureId}/testcases/${testcaseId}`, {

@@ -1,7 +1,10 @@
 import logging
 from contextlib import asynccontextmanager
+from pathlib import Path
 from fastapi import Depends, FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse
 from sqlalchemy.exc import OperationalError  # type: ignore[import-untyped]
 from core.config import get_settings
 from database.db import create_tables, get_table_names, get_table_columns
@@ -53,3 +56,12 @@ def health_check():
 @app.get("/protected")
 def read_protected(current_user: UserResponse = Depends(get_current_user)):
     return {"message": "This is a protected route", "user": current_user}
+
+# Serve React frontend — must be after all API routes
+static_dir = Path(__file__).parent / "static"
+if static_dir.exists():
+    app.mount("/assets", StaticFiles(directory=static_dir / "assets"), name="assets")
+
+    @app.get("/{full_path:path}")
+    def serve_frontend(full_path: str):
+        return FileResponse(static_dir / "index.html")
