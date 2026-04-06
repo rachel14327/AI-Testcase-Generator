@@ -17,6 +17,7 @@ class testcasesService:
             user_id=user_id,
             feature_id=feature_id,
             status=body.status,
+            section=body.section,
         )
         self.session.add(testcase)
         self.session.commit()

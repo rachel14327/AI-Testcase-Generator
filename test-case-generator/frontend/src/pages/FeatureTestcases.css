@@ -38,6 +38,19 @@
   color: #64748b;
 }
 
+.ftc-section-btn {
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  background: transparent;
+  color: #38bdf8;
+  font-size: 0.875rem;
+  font-weight: 600;
+  border: 1px solid rgba(14, 165, 233, 0.35);
+  cursor: pointer;
+}
+
+.ftc-section-btn:hover { background: rgba(14, 165, 233, 0.08); }
+
 .ftc-add-btn {
   padding: 0.5rem 1rem;
   border-radius: 6px;
@@ -392,6 +405,49 @@
   background: rgba(251, 146, 60, 0.12);
   border: 1px solid rgba(251, 146, 60, 0.35);
   color: #fb923c;
+}
+
+/* ── Active section indicator ── */
+.ftc-active-section {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 0.75rem;
+  padding: 0.5rem 0.85rem;
+  border-radius: 6px;
+  background: rgba(14, 165, 233, 0.08);
+  border: 1px solid rgba(14, 165, 233, 0.25);
+  font-size: 0.875rem;
+  color: #94a3b8;
+}
+
+.ftc-active-section strong { color: #38bdf8; }
+
+.ftc-clear-section {
+  background: none;
+  border: none;
+  color: #64748b;
+  cursor: pointer;
+  font-size: 0.8rem;
+  padding: 0;
+  margin-left: auto;
+}
+
+.ftc-clear-section:hover { color: #f87171; }
+
+/* ── Section heading row ── */
+.ftc-section-row {
+  background: rgba(14, 165, 233, 0.05);
+}
+
+.ftc-section-heading {
+  padding: 0.5rem 1rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #38bdf8;
+  border-top: 1px solid rgba(14, 165, 233, 0.2);
 }
 
 /* ── Delete button ── */

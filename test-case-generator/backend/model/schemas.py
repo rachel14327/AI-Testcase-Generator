@@ -129,6 +129,7 @@ class AlltestcasesPerFeatureResponse(BaseModel):
 class addTestcaseRequest(BaseModel):
     testcase: str
     status: str = "untested"
+    section: Optional[str] = None
 
     class Config:
         from_attributes = True
@@ -137,6 +138,7 @@ class addTestcaseResponse(BaseModel):
     feature_id: int
     name: str
     status: str
+    section: Optional[str] = None
 
     class Config:
         from_attributes = True

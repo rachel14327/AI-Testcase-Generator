@@ -39,5 +39,6 @@ class Testcase(Base):
     priority = Column(Text, nullable=True)
     status = Column(Text, nullable=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
+    section = Column(Text, nullable=True)
 
 

@@ -199,7 +199,7 @@ export async function deleteTestcase(featureId, testcaseId) {
   return res.json()
 }
 
-export async function addTestcase(featureId, testcase) {
+export async function addTestcase(featureId, testcase, section = null) {
   const token = getToken()
   const res = await fetch(`${API_BASE}/api/v1/features/${featureId}/add-testcase`, {
     method: 'POST',
@@ -207,7 +207,7 @@ export async function addTestcase(featureId, testcase) {
       'Content-Type': 'application/json',
       ...(token ? { Authorization: `Bearer ${token}` } : {}),
     },
-    body: JSON.stringify({ testcase }),
+    body: JSON.stringify({ testcase, section }),
   })
   if (!res.ok) {
     const err = await res.json().catch(() => ({ detail: res.statusText }))
