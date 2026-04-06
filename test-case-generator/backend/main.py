@@ -11,11 +11,13 @@ from database.db import create_tables, get_table_names, get_table_columns
 from model.schemas import UserResponse
 from model.user import User  # noqa: F401 - register model with Base
 from model.document import Document  # noqa: F401 - register model with Base
+from model.project import project  # noqa: F401 - register model with Base
 from routers.auth import authRouter
 from routers.rag import ragRouter
 from routers.upload import uploadRouter
 from routers.features import featuresRouter
 from routers.testcases import testcasesRouter
+from routers.project import projectRouter
 from util.protectedRoute import get_current_user
 logger = logging.getLogger(__name__)
 settings = get_settings()
@@ -46,6 +48,7 @@ app.include_router(authRouter, prefix="/api/v1/auth", tags=["auth"])
 app.include_router(uploadRouter, prefix="/api/v1/upload", tags=["upload"])
 app.include_router(ragRouter, prefix="/api/v1/rag", tags=["rag"])
 app.include_router(featuresRouter, prefix="/api/v1", tags=["features"])
+app.include_router(projectRouter, prefix="/api/v1", tags=["projects"])
 app.include_router(testcasesRouter, prefix="/api/v1", tags=["testcases"])
 
 

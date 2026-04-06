@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import Optional, Union
+from typing import List, Optional, Union
 
 from fastapi import UploadFile
 from pydantic import BaseModel, EmailStr
@@ -190,3 +190,17 @@ class updateDesriptionRequest(BaseModel):
 
     class Config:
         from_attributes = True  
+
+class ProjectResponse(BaseModel):
+    id: int
+    name: str
+    description: Optional[str] = None
+
+    class Config:
+        from_attributes = True
+
+class getProjectsResponse(BaseModel):
+    projects: List[ProjectResponse]
+
+    class Config:
+        from_attributes = True

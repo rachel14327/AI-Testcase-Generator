@@ -14,6 +14,7 @@ export default function Header() {
             <Link to="/upload" className="app-header-link">Upload</Link>
             <Link to="/rag" className="app-header-link">Generate test cases</Link>
             <Link to="/features" className="app-header-link">Features</Link>
+            <Link to="/projects" className="app-header-link">Projects</Link>
           </>
         )}
       </nav>

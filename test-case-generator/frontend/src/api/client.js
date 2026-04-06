@@ -104,6 +104,18 @@ export async function processRag(documentId, featureName) {
   return res.json()
 }
 
+export async function getProjects() {
+  const token = getToken()
+  const res = await fetch(`${API_BASE}/api/v1/projects`, {
+    headers: token ? { Authorization: `Bearer ${token}` } : {},
+  })
+  if (!res.ok) {
+    if (res.status === 401) throw new Error('Unauthorized')
+    throw new Error('Failed to fetch projects')
+  }
+  return res.json()
+}
+
 export async function getFeatures() {
   const token = getToken()
   const res = await fetch(`${API_BASE}/api/v1/features`, {

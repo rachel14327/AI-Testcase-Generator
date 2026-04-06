@@ -10,6 +10,7 @@ import Rag from './pages/Rag'
 import Features from './pages/Features'
 import FeatureTestcases from './pages/FeatureTestcases'
 import TestcaseDetail from './pages/TestcaseDetail'
+import Projects from './pages/Projects'
 
 function App() {
   return (
@@ -23,6 +24,7 @@ function App() {
         <Route path="/protected" element={<Protected />} />
         <Route path="/upload" element={<Upload />} />
         <Route path="/rag" element={<Rag />} />
+        <Route path="/projects" element={<Projects />} />
         <Route path="/features" element={<Features />} />
         <Route path="/features/:featureId" element={<FeatureTestcases />} />
         <Route path="/features/:featureId/testcases/:testcaseId" element={<TestcaseDetail />} />
