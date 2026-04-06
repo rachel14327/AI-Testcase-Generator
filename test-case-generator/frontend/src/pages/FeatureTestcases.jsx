@@ -5,10 +5,10 @@ import { useAuth } from '../context/AuthContext'
 import './FeatureTestcases.css'
 
 const STATUS_OPTIONS = [
-  { value: 'untested',  label: 'Untested',  color: 'grey' },
-  { value: 'passed',    label: 'Passed',    color: 'green' },
-  { value: 'failed',    label: 'Failed',    color: 'red' },
-  { value: 'blocked',   label: 'Blocked',   color: 'orange' },
+  { value: 'untested', label: 'Untested', color: 'grey' },
+  { value: 'passed',   label: 'Passed',   color: 'green' },
+  { value: 'failed',   label: 'Failed',   color: 'red' },
+  { value: 'blocked',  label: 'Blocked',  color: 'orange' },
 ]
 
 export default function FeatureTestcases() {
@@ -20,19 +20,13 @@ export default function FeatureTestcases() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
 
+  const [showForm, setShowForm] = useState(false)
   const [testcaseInput, setTestcaseInput] = useState('')
   const [adding, setAdding] = useState(false)
   const [addError, setAddError] = useState(null)
   const [deletingId, setDeletingId] = useState(null)
-  const [showForm, setShowForm] = useState(false)
   const [openDropdown, setOpenDropdown] = useState(null)
   const [updatingId, setUpdatingId] = useState(null)
-
-  // Section state
-  const [activeSection, setActiveSection] = useState(null)
-  const [showSectionInput, setShowSectionInput] = useState(false)
-  const [sectionDraft, setSectionDraft] = useState('')
-
   const dropdownRef = useRef(null)
 
   async function load() {
@@ -64,12 +58,29 @@ export default function FeatureTestcases() {
     return () => document.removeEventListener('mousedown', handle)
   }, [])
 
+  async function onAddTestcase(e) {
+    e.preventDefault()
+    if (!testcaseInput.trim()) return
+    setAdding(true)
+    setAddError(null)
+    try {
+      await addTestcase(featureId, testcaseInput.trim())
+      setTestcaseInput('')
+      setShowForm(false)
+      await load()
+    } catch (e) {
+      setAddError(e.message || 'Failed to add testcase')
+    } finally {
+      setAdding(false)
+    }
+  }
+
   async function onUpdateStatus(tcId, status) {
     setUpdatingId(tcId)
     setOpenDropdown(null)
     try {
       await updateTestcaseStatus(featureId, tcId, status)
-      setTestcases((prev) => prev.map((tc) => tc.id === tcId ? { ...tc, status } : tc))
+      setTestcases(prev => prev.map(tc => tc.id === tcId ? { ...tc, status } : tc))
     } catch (e) {
       setError(e.message || 'Failed to update status')
     } finally {
@@ -82,7 +93,7 @@ export default function FeatureTestcases() {
     setDeletingId(testcaseId)
     try {
       await deleteTestcase(featureId, testcaseId)
-      setTestcases((prev) => prev.filter((tc) => tc.id !== testcaseId))
+      setTestcases(prev => prev.filter(tc => tc.id !== testcaseId))
     } catch (e) {
       setError(e.message || 'Failed to delete testcase')
     } finally {
@@ -90,41 +101,17 @@ export default function FeatureTestcases() {
     }
   }
 
-  async function onAddTestcase(e) {
-    e.preventDefault()
-    if (!testcaseInput.trim()) return
-    setAdding(true)
-    setAddError(null)
-    try {
-      await addTestcase(featureId, testcaseInput.trim(), activeSection)
-      setTestcaseInput('')
-      setShowForm(false)
-      await load()
-    } catch (e) {
-      setAddError(e.message || 'Failed to add testcase')
-    } finally {
-      setAdding(false)
-    }
-  }
-
-  function onConfirmSection(e) {
-    e.preventDefault()
-    if (!sectionDraft.trim()) return
-    setActiveSection(sectionDraft.trim())
-    setSectionDraft('')
-    setShowSectionInput(false)
-  }
-
   if (!user) return null
+
+  const total = testcases.length
 
   return (
     <div className="ftc-page">
       <div className="ftc-header">
         <button className="ftc-back" onClick={() => navigate('/features')}>← Features</button>
         <div className="ftc-header-right">
-          <span className="ftc-count">{testcases.length} test case{testcases.length !== 1 ? 's' : ''}</span>
-          <button className="ftc-section-btn" onClick={() => { setShowSectionInput((v) => !v); setShowForm(false) }}>+ Add Section</button>
-          <button className="ftc-add-btn" onClick={() => { setShowForm((v) => !v); setShowSectionInput(false) }}>+ Add Test Case</button>
+          <span className="ftc-count">{total} test case{total !== 1 ? 's' : ''}</span>
+          <button className="ftc-add-btn" onClick={() => setShowForm(v => !v)}>+ Add Test Case</button>
         </div>
       </div>
 
@@ -133,45 +120,16 @@ export default function FeatureTestcases() {
         <span className="ftc-feature-badge">Feature #{featureId}</span>
       </div>
 
-      {/* Active section indicator */}
-      {activeSection && (
-        <div className="ftc-active-section">
-          <span>Adding to section: <strong>{activeSection}</strong></span>
-          <button className="ftc-clear-section" onClick={() => setActiveSection(null)}>✕ Clear</button>
-        </div>
-      )}
-
-      {/* Section input form */}
-      {showSectionInput && (
-        <form className="ftc-inline-form" onSubmit={onConfirmSection}>
-          <input
-            className="ftc-input"
-            value={sectionDraft}
-            onChange={(e) => setSectionDraft(e.target.value)}
-            placeholder="Enter section heading e.g. Login Flow"
-            autoFocus
-          />
-          <div className="ftc-form-actions">
-            <button type="submit" className="ftc-submit-btn" disabled={!sectionDraft.trim()}>
-              Set Section
-            </button>
-            <button type="button" className="ftc-cancel-btn" onClick={() => { setShowSectionInput(false); setSectionDraft('') }}>
-              Cancel
-            </button>
-          </div>
-        </form>
-      )}
-
-      {/* Test case add form */}
       {showForm && (
         <form className="ftc-inline-form" onSubmit={onAddTestcase}>
           <input
             className="ftc-input"
             value={testcaseInput}
-            onChange={(e) => setTestcaseInput(e.target.value)}
+            onChange={e => setTestcaseInput(e.target.value)}
             placeholder="Enter test case title..."
             disabled={adding}
             autoFocus
+            autoComplete="off"
           />
           <div className="ftc-form-actions">
             <button type="submit" className="ftc-submit-btn" disabled={adding || !testcaseInput.trim()}>
@@ -187,59 +145,39 @@ export default function FeatureTestcases() {
 
       {error && <div className="ftc-error">{error}</div>}
 
-      {!loading && testcases.length > 0 && (() => {
-        const total = testcases.length
+      {!loading && total > 0 && (() => {
         const counts = {
           passed:   testcases.filter(tc => (tc.status || 'untested') === 'passed').length,
           failed:   testcases.filter(tc => (tc.status || 'untested') === 'failed').length,
           blocked:  testcases.filter(tc => (tc.status || 'untested') === 'blocked').length,
           untested: testcases.filter(tc => (tc.status || 'untested') === 'untested').length,
         }
-        const pct = (n) => Math.round((n / total) * 100)
+        const pct = n => Math.round((n / total) * 100)
         const segments = [
           { color: '#4ade80', count: counts.passed },
           { color: '#f87171', count: counts.failed },
           { color: '#fb923c', count: counts.blocked },
           { color: '#475569', count: counts.untested },
         ]
-        let cumulative = 0
-        const stops = segments
-          .filter(s => s.count > 0)
-          .map(s => {
-            const start = cumulative
-            cumulative += (s.count / total) * 100
-            return `${s.color} ${start}% ${cumulative}%`
-          })
-        const gradient = `conic-gradient(${stops.join(', ')})`
+        let cum = 0
+        const stops = segments.filter(s => s.count > 0).map(s => {
+          const start = cum
+          cum += (s.count / total) * 100
+          return `${s.color} ${start}% ${cum}%`
+        })
         return (
           <div className="ftc-stats">
             <div className="ftc-pie-wrap">
-              <div className="ftc-pie" style={{ background: gradient }} />
+              <div className="ftc-pie" style={{ background: `conic-gradient(${stops.join(', ')})` }} />
               <div className="ftc-pie-legend">
-                <div className="ftc-legend-item">
-                  <span className="ftc-legend-dot" style={{ background: '#4ade80' }} />
-                  <span className="ftc-legend-label">Passed</span>
-                  <span className="ftc-legend-pct">{pct(counts.passed)}%</span>
-                  <span className="ftc-legend-count">({counts.passed})</span>
-                </div>
-                <div className="ftc-legend-item">
-                  <span className="ftc-legend-dot" style={{ background: '#f87171' }} />
-                  <span className="ftc-legend-label">Failed</span>
-                  <span className="ftc-legend-pct">{pct(counts.failed)}%</span>
-                  <span className="ftc-legend-count">({counts.failed})</span>
-                </div>
-                <div className="ftc-legend-item">
-                  <span className="ftc-legend-dot" style={{ background: '#fb923c' }} />
-                  <span className="ftc-legend-label">Blocked</span>
-                  <span className="ftc-legend-pct">{pct(counts.blocked)}%</span>
-                  <span className="ftc-legend-count">({counts.blocked})</span>
-                </div>
-                <div className="ftc-legend-item">
-                  <span className="ftc-legend-dot" style={{ background: '#475569' }} />
-                  <span className="ftc-legend-label">Untested</span>
-                  <span className="ftc-legend-pct">{pct(counts.untested)}%</span>
-                  <span className="ftc-legend-count">({counts.untested})</span>
-                </div>
+                {[['#4ade80','Passed',counts.passed],['#f87171','Failed',counts.failed],['#fb923c','Blocked',counts.blocked],['#475569','Untested',counts.untested]].map(([color, label, count]) => (
+                  <div key={label} className="ftc-legend-item">
+                    <span className="ftc-legend-dot" style={{ background: color }} />
+                    <span className="ftc-legend-label">{label}</span>
+                    <span className="ftc-legend-pct">{pct(count)}%</span>
+                    <span className="ftc-legend-count">({count})</span>
+                  </div>
+                ))}
               </div>
             </div>
           </div>
@@ -259,76 +197,63 @@ export default function FeatureTestcases() {
           <tbody>
             {loading ? (
               <tr><td colSpan={4} className="ftc-td-empty">Loading…</td></tr>
-            ) : testcases.length === 0 ? (
+            ) : total === 0 ? (
               <tr><td colSpan={4} className="ftc-td-empty">No test cases yet. Click "+ Add Test Case" to create one.</td></tr>
-            ) : (() => {
-              const grouped = testcases.reduce((acc, tc) => {
-                const key = tc.section || ''
-                if (!acc[key]) acc[key] = []
-                acc[key].push(tc)
-                return acc
-              }, {})
-              return Object.entries(grouped).map(([section, cases]) => (
-                <>
-                  {section && (
-                    <tr key={`section-${section}`} className="ftc-section-row">
-                      <td colSpan={4} className="ftc-section-heading">{section}</td>
-                    </tr>
-                  )}
-                  {cases.map((tc, i) => {
-                    const currentStatus = tc.status || 'untested'
-                    const statusOpt = STATUS_OPTIONS.find((s) => s.value === currentStatus) ?? STATUS_OPTIONS[0]
-                    return (
-                      <tr key={tc.id ?? i} className="ftc-row">
-                        <td className="ftc-td ftc-td-id">C{tc.id ?? i + 1}</td>
-                        <td className="ftc-td ftc-td-title" style={{ cursor: 'pointer' }} onClick={() => navigate(`/features/${featureId}/testcases/${tc.id}`)}>{tc.name ?? tc.testcase ?? `Test Case ${i + 1}`}</td>
-                        <td className="ftc-td">
-                          <span className={`ftc-status ftc-status-${currentStatus}`}>
-                            {updatingId === tc.id ? '…' : statusOpt.label}
-                          </span>
-                        </td>
-                        <td className="ftc-td ftc-td-actions" ref={openDropdown === tc.id ? dropdownRef : null}>
-                          <div className="ftc-action-wrap">
+            ) : (
+              testcases.map((tc) => {
+                const currentStatus = tc.status || 'untested'
+                const statusOpt = STATUS_OPTIONS.find(s => s.value === currentStatus) ?? STATUS_OPTIONS[0]
+                return (
+                  <tr key={tc.id} className="ftc-row">
+                    <td className="ftc-td ftc-td-id">C{tc.id}</td>
+                    <td className="ftc-td ftc-td-title" style={{ cursor: 'pointer' }} onClick={() => navigate(`/features/${featureId}/testcases/${tc.id}`)}>
+                      {tc.name ?? tc.testcase ?? `Test Case ${tc.id}`}
+                    </td>
+                    <td className="ftc-td">
+                      <span className={`ftc-status ftc-status-${currentStatus}`}>
+                        {updatingId === tc.id ? '…' : statusOpt.label}
+                      </span>
+                    </td>
+                    <td className="ftc-td ftc-td-actions" ref={openDropdown === tc.id ? dropdownRef : null}>
+                      <div className="ftc-action-wrap">
+                        <button
+                          type="button"
+                          className="ftc-action-btn"
+                          onClick={() => setOpenDropdown(openDropdown === tc.id ? null : tc.id)}
+                          disabled={updatingId === tc.id || deletingId === tc.id}
+                        >
+                          Actions ▾
+                        </button>
+                        {openDropdown === tc.id && (
+                          <div className="ftc-dropdown">
+                            <div className="ftc-dropdown-section">Set status</div>
+                            {STATUS_OPTIONS.map(opt => (
+                              <button
+                                key={opt.value}
+                                type="button"
+                                className={`ftc-dropdown-item ftc-dropdown-${opt.color} ${currentStatus === opt.value ? 'active' : ''}`}
+                                onClick={() => onUpdateStatus(tc.id, opt.value)}
+                              >
+                                {opt.label}
+                              </button>
+                            ))}
+                            <div className="ftc-dropdown-divider" />
                             <button
                               type="button"
-                              className="ftc-action-btn"
-                              onClick={() => setOpenDropdown(openDropdown === tc.id ? null : tc.id)}
-                              disabled={updatingId === tc.id || deletingId === tc.id}
+                              className="ftc-dropdown-item ftc-dropdown-danger"
+                              onClick={() => { setOpenDropdown(null); onDeleteTestcase(tc.id) }}
+                              disabled={deletingId === tc.id}
                             >
-                              Actions ▾
+                              {deletingId === tc.id ? 'Deleting…' : 'Delete'}
                             </button>
-                            {openDropdown === tc.id && (
-                              <div className="ftc-dropdown">
-                                <div className="ftc-dropdown-section">Set status</div>
-                                {STATUS_OPTIONS.map((opt) => (
-                                  <button
-                                    key={opt.value}
-                                    type="button"
-                                    className={`ftc-dropdown-item ftc-dropdown-${opt.color} ${currentStatus === opt.value ? 'active' : ''}`}
-                                    onClick={() => onUpdateStatus(tc.id, opt.value)}
-                                  >
-                                    {opt.label}
-                                  </button>
-                                ))}
-                                <div className="ftc-dropdown-divider" />
-                                <button
-                                  type="button"
-                                  className="ftc-dropdown-item ftc-dropdown-danger"
-                                  onClick={() => { setOpenDropdown(null); onDeleteTestcase(tc.id) }}
-                                  disabled={deletingId === tc.id}
-                                >
-                                  {deletingId === tc.id ? 'Deleting…' : 'Delete'}
-                                </button>
-                              </div>
-                            )}
                           </div>
-                        </td>
-                      </tr>
-                    )
-                  })}
-                </>
-              ))
-            })()}
+                        )}
+                      </div>
+                    </td>
+                  </tr>
+                )
+              })
+            )}
           </tbody>
         </table>
       </div>
