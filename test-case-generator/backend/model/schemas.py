@@ -204,3 +204,14 @@ class getProjectsResponse(BaseModel):
 
     class Config:
         from_attributes = True
+
+class updateTestcaseRequest(BaseModel):
+    name: str
+    class Config:
+        from_attributes = True
+
+class updateTestcaseResponse(BaseModel):
+    id: int
+    name: str
+    class Config:
+        from_attributes = True

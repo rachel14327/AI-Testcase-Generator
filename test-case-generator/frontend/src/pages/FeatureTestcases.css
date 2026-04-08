@@ -495,6 +495,52 @@
 .ftc-form-section-label strong { color: #38bdf8; }
 
 /* ── Delete button ── */
+/* ── Inline edit ── */
+.ftc-inline-edit {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.ftc-edit-input {
+  flex: 1;
+  padding: 0.35rem 0.6rem;
+  border-radius: 5px;
+  border: 1px solid #0ea5e9;
+  background: rgba(15, 23, 42, 0.8);
+  color: #e2e8f0;
+  font-size: 0.9rem;
+  outline: none;
+}
+
+.ftc-edit-save-btn {
+  padding: 0.3rem 0.7rem;
+  border-radius: 5px;
+  background: #0ea5e9;
+  color: #fff;
+  font-size: 0.8rem;
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.ftc-edit-save-btn:hover:not(:disabled) { background: #0284c7; }
+.ftc-edit-save-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.ftc-edit-cancel-btn {
+  padding: 0.3rem 0.6rem;
+  border-radius: 5px;
+  background: transparent;
+  color: #94a3b8;
+  font-size: 0.8rem;
+  border: 1px solid rgba(71, 85, 105, 0.5);
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.ftc-edit-cancel-btn:hover:not(:disabled) { color: #e2e8f0; }
+
 .ftc-delete-btn {
   padding: 0.3rem 0.6rem;
   border-radius: 5px;

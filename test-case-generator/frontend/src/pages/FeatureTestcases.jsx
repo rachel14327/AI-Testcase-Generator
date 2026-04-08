@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
-import { addTestcase, deleteTestcase, getFeatureTestcases, updateTestcaseStatus } from '../api/client'
+import { addTestcase, deleteTestcase, getFeatureTestcases, updateTestcaseStatus, updateTestcaseName } from '../api/client'
 import { useAuth } from '../context/AuthContext'
 import './FeatureTestcases.css'
 
@@ -27,7 +27,11 @@ export default function FeatureTestcases() {
   const [deletingId, setDeletingId] = useState(null)
   const [openDropdown, setOpenDropdown] = useState(null)
   const [updatingId, setUpdatingId] = useState(null)
+  const [editingId, setEditingId] = useState(null)
+  const [editingName, setEditingName] = useState('')
+  const [savingEdit, setSavingEdit] = useState(false)
   const dropdownRef = useRef(null)
+  const editInputRef = useRef(null)
 
   async function load() {
     setLoading(true)
@@ -85,6 +89,33 @@ export default function FeatureTestcases() {
       setError(e.message || 'Failed to update status')
     } finally {
       setUpdatingId(null)
+    }
+  }
+
+  function startEdit(tc) {
+    setOpenDropdown(null)
+    setEditingId(tc.id)
+    setEditingName(tc.name ?? tc.testcase ?? '')
+    setTimeout(() => editInputRef.current?.focus(), 0)
+  }
+
+  function cancelEdit() {
+    setEditingId(null)
+    setEditingName('')
+  }
+
+  async function saveEdit(tcId) {
+    if (!editingName.trim()) return
+    setSavingEdit(true)
+    try {
+      await updateTestcaseName(featureId, tcId, editingName.trim())
+      setTestcases(prev => prev.map(tc => tc.id === tcId ? { ...tc, name: editingName.trim() } : tc))
+      setEditingId(null)
+      setEditingName('')
+    } catch (e) {
+      setError(e.message || 'Failed to rename testcase')
+    } finally {
+      setSavingEdit(false)
     }
   }
 
@@ -203,11 +234,36 @@ export default function FeatureTestcases() {
               testcases.map((tc) => {
                 const currentStatus = tc.status || 'untested'
                 const statusOpt = STATUS_OPTIONS.find(s => s.value === currentStatus) ?? STATUS_OPTIONS[0]
+                const isEditing = editingId === tc.id
                 return (
                   <tr key={tc.id} className="ftc-row">
                     <td className="ftc-td ftc-td-id">C{tc.id}</td>
-                    <td className="ftc-td ftc-td-title" style={{ cursor: 'pointer' }} onClick={() => navigate(`/features/${featureId}/testcases/${tc.id}`)}>
-                      {tc.name ?? tc.testcase ?? `Test Case ${tc.id}`}
+                    <td className="ftc-td ftc-td-title">
+                      {isEditing ? (
+                        <div className="ftc-inline-edit">
+                          <input
+                            ref={editInputRef}
+                            className="ftc-edit-input"
+                            value={editingName}
+                            onChange={e => setEditingName(e.target.value)}
+                            onKeyDown={e => {
+                              if (e.key === 'Enter') saveEdit(tc.id)
+                              if (e.key === 'Escape') cancelEdit()
+                            }}
+                            disabled={savingEdit}
+                          />
+                          <button className="ftc-edit-save-btn" onClick={() => saveEdit(tc.id)} disabled={savingEdit || !editingName.trim()}>
+                            {savingEdit ? '…' : 'Save'}
+                          </button>
+                          <button className="ftc-edit-cancel-btn" onClick={cancelEdit} disabled={savingEdit}>
+                            Cancel
+                          </button>
+                        </div>
+                      ) : (
+                        <span style={{ cursor: 'pointer' }} onClick={() => navigate(`/features/${featureId}/testcases/${tc.id}`)}>
+                          {tc.name ?? tc.testcase ?? `Test Case ${tc.id}`}
+                        </span>
+                      )}
                     </td>
                     <td className="ftc-td">
                       <span className={`ftc-status ftc-status-${currentStatus}`}>
@@ -220,7 +276,7 @@ export default function FeatureTestcases() {
                           type="button"
                           className="ftc-action-btn"
                           onClick={() => setOpenDropdown(openDropdown === tc.id ? null : tc.id)}
-                          disabled={updatingId === tc.id || deletingId === tc.id}
+                          disabled={updatingId === tc.id || deletingId === tc.id || isEditing}
                         >
                           Actions ▾
                         </button>
@@ -237,6 +293,14 @@ export default function FeatureTestcases() {
                                 {opt.label}
                               </button>
                             ))}
+                            <div className="ftc-dropdown-divider" />
+                            <button
+                              type="button"
+                              className="ftc-dropdown-item ftc-dropdown-grey"
+                              onClick={() => startEdit(tc)}
+                            >
+                              Edit name
+                            </button>
                             <div className="ftc-dropdown-divider" />
                             <button
                               type="button"

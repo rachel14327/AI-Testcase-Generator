@@ -1,6 +1,6 @@
 from fastapi import HTTPException
 from sqlalchemy.orm import Session
-from model.schemas import TestcaseResponse, addTestcaseResponse, addTestcaseRequest, deteleTestcaseResponse, updateTestcaseStatusRequest, updateTestcaseStatusResponse, getTestcaseDescriptionResponse, updateDesriptionRequest, updateDesriptionResponse
+from model.schemas import TestcaseResponse, addTestcaseResponse, addTestcaseRequest, deteleTestcaseResponse, updateTestcaseStatusRequest, updateTestcaseStatusResponse, getTestcaseDescriptionResponse, updateDesriptionRequest, updateDesriptionResponse, updateTestcaseRequest, updateTestcaseResponse
 from model.document import Testcase
 from typing import List
 
@@ -59,6 +59,19 @@ class testcasesService:
             raise HTTPException(status_code=404, detail="Testcase not found")
         return testcase
     
+    def update_testcase_name(self, user_id: int, feature_id: int, testcase_id: int, body: updateTestcaseRequest) -> updateTestcaseResponse:
+        testcase = self.session.query(Testcase).filter(
+            Testcase.id == testcase_id,
+            Testcase.feature_id == feature_id,
+            Testcase.user_id == user_id,
+        ).first()
+        if not testcase:
+            raise HTTPException(status_code=404, detail="Testcase not found")
+        testcase.name = body.name
+        self.session.commit()
+        self.session.refresh(testcase)
+        return testcase
+
     def update_testcase_description(self, user_id:int, feature_id:int, testcase_id: int, body: updateDesriptionRequest) -> updateDesriptionResponse:
         testcase = self.session.query(Testcase).filter(
             Testcase.id == testcase_id,
