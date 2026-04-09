@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, useNavigate, useLocation } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import './Auth.css'
 
@@ -8,13 +8,15 @@ export default function Login() {
   const [password, setPassword] = useState('')
   const { login, error, setError } = useAuth()
   const navigate = useNavigate()
+  const location = useLocation()
+  const from = location.state?.from || '/'
 
   async function handleSubmit(e) {
     e.preventDefault()
     setError(null)
     try {
       await login(email, password)
-      navigate('/', { replace: true })
+      navigate(from, { replace: true })
     } catch {
       // error already set in context
     }

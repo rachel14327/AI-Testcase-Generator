@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useLocation } from 'react-router-dom'
 import { createFeature, deleteFeature, getFeatures } from '../api/client'
 import { useAuth } from '../context/AuthContext'
 import './Features.css'
@@ -7,6 +7,7 @@ import './Features.css'
 export default function Features() {
   const { user, token } = useAuth()
   const navigate = useNavigate()
+  const location = useLocation()
 
   const [items, setItems] = useState([])
   const [loading, setLoading] = useState(true)
@@ -35,7 +36,7 @@ export default function Features() {
 
   useEffect(() => {
     if (!token) {
-      navigate('/login', { replace: true })
+      navigate('/login', { replace: true, state: { from: location.pathname } })
       return
     }
     load()

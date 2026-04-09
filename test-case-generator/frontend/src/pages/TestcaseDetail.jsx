@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { useNavigate, useParams } from 'react-router-dom'
+import { useNavigate, useParams, useLocation } from 'react-router-dom'
 import { getTestcaseDescription, updateTestcaseDescription } from '../api/client'
 import { useAuth } from '../context/AuthContext'
 import './TestcaseDetail.css'
@@ -15,6 +15,7 @@ export default function TestcaseDetail() {
   const { featureId, testcaseId } = useParams()
   const { user, token } = useAuth()
   const navigate = useNavigate()
+  const location = useLocation()
 
   const [tc, setTc] = useState(null)
   const [loading, setLoading] = useState(true)
@@ -25,7 +26,7 @@ export default function TestcaseDetail() {
   const [form, setForm] = useState({ name: '', status: 'untested', description: '', steps: '', expected_result: '' })
 
   useEffect(() => {
-    if (!token) { navigate('/login', { replace: true }); return }
+    if (!token) { navigate('/login', { replace: true, state: { from: location.pathname } }); return }
     async function load() {
       setLoading(true)
       setError(null)

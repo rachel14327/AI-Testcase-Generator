@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { useNavigate, useParams } from 'react-router-dom'
+import { useNavigate, useParams, useLocation } from 'react-router-dom'
 import { addTestcase, deleteTestcase, getFeatureTestcases, updateTestcaseStatus, updateTestcaseName } from '../api/client'
 import { useAuth } from '../context/AuthContext'
 import './FeatureTestcases.css'
@@ -15,6 +15,7 @@ export default function FeatureTestcases() {
   const { featureId } = useParams()
   const { user, token } = useAuth()
   const navigate = useNavigate()
+  const location = useLocation()
 
   const [testcases, setTestcases] = useState([])
   const [loading, setLoading] = useState(true)
@@ -47,7 +48,7 @@ export default function FeatureTestcases() {
   }
 
   useEffect(() => {
-    if (!token) { navigate('/login', { replace: true }); return }
+    if (!token) { navigate('/login', { replace: true, state: { from: location.pathname } }); return }
     load()
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [featureId, token, navigate])

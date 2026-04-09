@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useLocation } from 'react-router-dom'
 import { getProjects } from '../api/client'
 import { useAuth } from '../context/AuthContext'
 import './Features.css'
@@ -7,6 +7,7 @@ import './Features.css'
 export default function Projects() {
   const { user, token } = useAuth()
   const navigate = useNavigate()
+  const location = useLocation()
 
   const [projects, setProjects] = useState([])
   const [loading, setLoading] = useState(true)
@@ -28,7 +29,7 @@ export default function Projects() {
   }
 
   useEffect(() => {
-    if (!token) { navigate('/login', { replace: true }); return }
+    if (!token) { navigate('/login', { replace: true, state: { from: location.pathname } }); return }
     load()
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [token, navigate])
