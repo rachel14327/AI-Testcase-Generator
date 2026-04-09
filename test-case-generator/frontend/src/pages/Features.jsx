@@ -147,7 +147,7 @@ export default function Features() {
               <tr><td colSpan={4} className="feat-td-empty">No features yet. Click "+ New Feature" to create one.</td></tr>
             ) : (
               items.map((f) => (
-                <tr key={f.id} className="feat-row" onClick={() => navigate(`/features/${f.id}`)}>
+                <tr key={f.id} className="feat-row" onClick={() => navigate(`/features/${f.id}`, { state: { featureName: f.name } })}>
                   <td className="feat-td feat-td-id">F{f.id}</td>
                   <td className="feat-td feat-td-name">{f.name}</td>
                   <td className="feat-td feat-td-desc">{f.description || <span className="feat-no-desc">—</span>}</td>

@@ -213,6 +213,11 @@
 .ftc-td-title {
   color: #e2e8f0;
   font-weight: 500;
+  max-width: 0;
+  width: 100%;
+  white-space: normal;
+  word-break: break-word;
+  overflow-wrap: break-word;
 }
 
 .ftc-td-actions { text-align: right; }

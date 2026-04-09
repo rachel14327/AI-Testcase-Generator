@@ -18,6 +18,7 @@ export default function FeatureTestcases() {
   const location = useLocation()
 
   const [testcases, setTestcases] = useState([])
+  const [featureName, setFeatureName] = useState(location.state?.featureName ?? null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
 
@@ -40,6 +41,7 @@ export default function FeatureTestcases() {
     try {
       const data = await getFeatureTestcases(featureId)
       setTestcases(Array.isArray(data) ? data : data.test_cases ?? [])
+      if (data.name) setFeatureName(data.name)
     } catch (e) {
       setError(e.message || 'Failed to load testcases')
     } finally {
@@ -149,7 +151,7 @@ export default function FeatureTestcases() {
 
       <div className="ftc-title-row">
         <h1 className="ftc-title">Test Cases</h1>
-        <span className="ftc-feature-badge">Feature #{featureId}</span>
+        <span className="ftc-feature-badge">{featureName ?? `Feature #${featureId}`}</span>
       </div>
 
       {showForm && (

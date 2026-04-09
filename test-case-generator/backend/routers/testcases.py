@@ -10,8 +10,8 @@ testcasesRouter = APIRouter()
 @testcasesRouter.get("/features/{feature_id}/testcases", response_model=AlltestcasesPerFeatureResponse)
 def get_feature_testcases(feature_id: int, session: Session = Depends(get_db), current_user: UserResponse = Depends(get_current_user)):
     try:
-        testcases = testcasesService(session=session).get_feature_testcases(user_id=current_user.id, feature_id=feature_id)
-        return {"feature_id": feature_id, "test_cases": testcases}
+        feature, testcases = testcasesService(session=session).get_feature_testcases(user_id=current_user.id, feature_id=feature_id)
+        return {"feature_id": feature_id, "name": feature.name if feature else None, "test_cases": testcases}
     except Exception as e:
         print(e)
         raise HTTPException(status_code=500, detail=str(e))

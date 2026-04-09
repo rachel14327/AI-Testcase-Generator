@@ -1,15 +1,17 @@
 from fastapi import HTTPException
 from sqlalchemy.orm import Session
 from model.schemas import TestcaseResponse, addTestcaseResponse, addTestcaseRequest, deteleTestcaseResponse, updateTestcaseStatusRequest, updateTestcaseStatusResponse, getTestcaseDescriptionResponse, updateDesriptionRequest, updateDesriptionResponse, updateTestcaseRequest, updateTestcaseResponse
-from model.document import Testcase
+from model.document import Testcase, Feature
 from typing import List
 
 class testcasesService:
     def __init__(self, session:Session):
         self.session = session
 
-    def get_feature_testcases(self, user_id:int, feature_id:int) -> List[TestcaseResponse]:
-        return self.session.query(Testcase).filter(Testcase.user_id == user_id, Testcase.feature_id == feature_id).all()
+    def get_feature_testcases(self, user_id: int, feature_id: int):
+        feature = self.session.query(Feature).filter(Feature.id == feature_id, Feature.user_id == user_id).first()
+        testcases = self.session.query(Testcase).filter(Testcase.user_id == user_id, Testcase.feature_id == feature_id).all()
+        return feature, testcases
     
     def create_testcase(self, user_id: int, feature_id: int, body: addTestcaseRequest) -> addTestcaseResponse:
         testcase = Testcase(

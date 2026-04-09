@@ -121,6 +121,7 @@ class createFeatureResponse(BaseModel):
 
 class AlltestcasesPerFeatureResponse(BaseModel):
     feature_id: int
+    name: Optional[str] = None
     test_cases: list[TestcaseResponse]
     class Config:
         from_attributes = True
