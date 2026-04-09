@@ -146,9 +146,9 @@ export default function Features() {
             ) : items.length === 0 ? (
               <tr><td colSpan={4} className="feat-td-empty">No features yet. Click "+ New Feature" to create one.</td></tr>
             ) : (
-              items.map((f) => (
+              items.map((f, index) => (
                 <tr key={f.id} className="feat-row" onClick={() => navigate(`/features/${f.id}`, { state: { featureName: f.name } })}>
-                  <td className="feat-td feat-td-id">F{f.id}</td>
+                  <td className="feat-td feat-td-id">F{index + 1}</td>
                   <td className="feat-td feat-td-name">{f.name}</td>
                   <td className="feat-td feat-td-desc">{f.description || <span className="feat-no-desc">—</span>}</td>
                   <td className="feat-td feat-td-actions" onClick={(e) => e.stopPropagation()}>
