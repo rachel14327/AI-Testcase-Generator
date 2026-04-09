@@ -234,13 +234,13 @@ export default function FeatureTestcases() {
             ) : total === 0 ? (
               <tr><td colSpan={4} className="ftc-td-empty">No test cases yet. Click "+ Add Test Case" to create one.</td></tr>
             ) : (
-              testcases.map((tc) => {
+              testcases.map((tc, index) => {
                 const currentStatus = tc.status || 'untested'
                 const statusOpt = STATUS_OPTIONS.find(s => s.value === currentStatus) ?? STATUS_OPTIONS[0]
                 const isEditing = editingId === tc.id
                 return (
                   <tr key={tc.id} className="ftc-row">
-                    <td className="ftc-td ftc-td-id">C{tc.id}</td>
+                    <td className="ftc-td ftc-td-id">C{index + 1}</td>
                     <td className="ftc-td ftc-td-title">
                       {isEditing ? (
                         <div className="ftc-inline-edit">
