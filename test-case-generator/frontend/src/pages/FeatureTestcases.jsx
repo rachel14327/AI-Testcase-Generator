@@ -26,6 +26,9 @@ export default function FeatureTestcases() {
   const [testcaseInput, setTestcaseInput] = useState('')
   const [adding, setAdding] = useState(false)
   const [addError, setAddError] = useState(null)
+  const [activeSection, setActiveSection] = useState(null)
+  const [showSectionForm, setShowSectionForm] = useState(false)
+  const [sectionInput, setSectionInput] = useState('')
   const [deletingId, setDeletingId] = useState(null)
   const [openDropdown, setOpenDropdown] = useState(null)
   const [updatingId, setUpdatingId] = useState(null)
@@ -71,7 +74,7 @@ export default function FeatureTestcases() {
     setAdding(true)
     setAddError(null)
     try {
-      await addTestcase(featureId, testcaseInput.trim())
+      await addTestcase(featureId, testcaseInput.trim(), activeSection)
       setTestcaseInput('')
       setShowForm(false)
       await load()
@@ -145,7 +148,8 @@ export default function FeatureTestcases() {
         <button className="ftc-back" onClick={() => navigate('/features')}>← Features</button>
         <div className="ftc-header-right">
           <span className="ftc-count">{total} test case{total !== 1 ? 's' : ''}</span>
-          <button className="ftc-add-btn" onClick={() => setShowForm(v => !v)}>+ Add Test Case</button>
+          <button className="ftc-section-btn" onClick={() => { setShowSectionForm(v => !v); setShowForm(false) }}>+ Add Section</button>
+          <button className="ftc-add-btn" onClick={() => { setShowForm(v => !v); setShowSectionForm(false) }}>+ Add Test Case</button>
         </div>
       </div>
 
@@ -154,8 +158,44 @@ export default function FeatureTestcases() {
         <span className="ftc-feature-badge">{featureName ?? `Feature #${featureId}`}</span>
       </div>
 
+      {showSectionForm && (
+        <form className="ftc-inline-form" onSubmit={e => {
+          e.preventDefault()
+          if (!sectionInput.trim()) return
+          setActiveSection(sectionInput.trim())
+          setSectionInput('')
+          setShowSectionForm(false)
+          setShowForm(true)
+        }}>
+          <input
+            className="ftc-input"
+            value={sectionInput}
+            onChange={e => setSectionInput(e.target.value)}
+            placeholder="Enter section heading (e.g. DB Validations)..."
+            autoFocus
+            autoComplete="off"
+          />
+          <div className="ftc-form-actions">
+            <button type="submit" className="ftc-submit-btn" disabled={!sectionInput.trim()}>
+              Set Section
+            </button>
+            <button type="button" className="ftc-cancel-btn" onClick={() => { setShowSectionForm(false); setSectionInput('') }}>
+              Cancel
+            </button>
+          </div>
+        </form>
+      )}
+
+      {activeSection && (
+        <div className="ftc-active-section">
+          <span>Adding to section: <strong>{activeSection}</strong></span>
+          <button className="ftc-clear-section" onClick={() => setActiveSection(null)}>✕ Clear section</button>
+        </div>
+      )}
+
       {showForm && (
         <form className="ftc-inline-form" onSubmit={onAddTestcase}>
+          {activeSection && <div className="ftc-form-section-label">Section: <strong>{activeSection}</strong></div>}
           <input
             className="ftc-input"
             value={testcaseInput}
@@ -234,11 +274,38 @@ export default function FeatureTestcases() {
             ) : total === 0 ? (
               <tr><td colSpan={4} className="ftc-td-empty">No test cases yet. Click "+ Add Test Case" to create one.</td></tr>
             ) : (
-              testcases.map((tc, index) => {
-                const currentStatus = tc.status || 'untested'
-                const statusOpt = STATUS_OPTIONS.find(s => s.value === currentStatus) ?? STATUS_OPTIONS[0]
-                const isEditing = editingId === tc.id
-                return (
+              (() => {
+                const rows = []
+                let lastSection = undefined
+                let counter = 0
+                testcases.forEach((tc) => {
+                  const section = tc.section ?? null
+                  if (section !== lastSection) {
+                    lastSection = section
+                    if (section) {
+                      rows.push(
+                        <tr key={`section-${section}`} className="ftc-section-row">
+                          <td colSpan={4} className="ftc-section-heading">
+                            <div className="ftc-section-heading-inner">
+                              {section}
+                              <button
+                                className={`ftc-section-add-tc ${activeSection === section ? 'active' : ''}`}
+                                onClick={() => { setActiveSection(section); setShowForm(true); setShowSectionForm(false) }}
+                              >
+                                + Add to this section
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      )
+                    }
+                  }
+                  counter++
+                  const index = counter - 1
+                  const currentStatus = tc.status || 'untested'
+                  const statusOpt = STATUS_OPTIONS.find(s => s.value === currentStatus) ?? STATUS_OPTIONS[0]
+                  const isEditing = editingId === tc.id
+                  rows.push(
                   <tr key={tc.id} className="ftc-row">
                     <td className="ftc-td ftc-td-id">C{index + 1}</td>
                     <td className="ftc-td ftc-td-title">
@@ -318,8 +385,10 @@ export default function FeatureTestcases() {
                       </div>
                     </td>
                   </tr>
-                )
-              })
+                  )
+                })
+                return rows
+              })()
             )}
           </tbody>
         </table>

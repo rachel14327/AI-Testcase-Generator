@@ -88,6 +88,7 @@ class TestcaseResponse(BaseModel):
     expected_result: Optional[str] = None
     priority: Optional[str] = None
     status: Optional[str] = None
+    section: Optional[str] = None
     created_at: datetime
 
     class Config:
