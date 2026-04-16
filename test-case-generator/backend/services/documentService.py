@@ -21,13 +21,13 @@ class documentService(object):
         safe_name = os.path.basename(file.filename or "upload.bin")
         content = file.file.read()
 
-        doc = Document(
+        doc = Document( 
             user_id=user_id,
             feature_name=feature_name,
             file_name=safe_name,
             file_path=None,
             file_content=content,
-        )
+        ) 
         self.session.add(doc)
         self.session.commit()
         self.session.refresh(doc)

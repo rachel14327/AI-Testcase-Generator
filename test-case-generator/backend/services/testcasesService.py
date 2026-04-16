@@ -34,7 +34,14 @@ class testcasesService:
         ).first()
         if not testcase:
             raise HTTPException(status_code=404, detail="Testcase not found")
+
+        status = (body.status or "").strip().lower()
+        if status in {"failed", "blocked"} and not (body.bug_id or "").strip():
+            raise HTTPException(status_code=400, detail="bug_id is required for failed or blocked testcases")
+
         testcase.status = body.status
+        testcase.testing_data = (body.testing_data or "").strip() or None
+        testcase.bug_id = (body.bug_id or "").strip() or None
         self.session.commit()
         self.session.refresh(testcase)
         return testcase

@@ -38,6 +38,8 @@ class Testcase(Base):
     expected_result = Column(Text, nullable=True)
     priority = Column(Text, nullable=True)
     status = Column(Text, nullable=True)
+    testing_data = Column(Text, nullable=True)
+    bug_id = Column(Text, nullable=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
     section = Column(Text, nullable=True)
 

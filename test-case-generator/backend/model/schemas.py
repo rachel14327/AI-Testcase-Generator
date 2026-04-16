@@ -88,6 +88,8 @@ class TestcaseResponse(BaseModel):
     expected_result: Optional[str] = None
     priority: Optional[str] = None
     status: Optional[str] = None
+    testing_data: Optional[str] = None
+    bug_id: Optional[str] = None
     section: Optional[str] = None
     created_at: datetime
 
@@ -155,10 +157,14 @@ class deteleTestcaseResponse(BaseModel):
 
 class updateTestcaseStatusRequest(BaseModel):
     status: str  # "passed", "failed", "blocked", "untested"
+    testing_data: Optional[str] = None
+    bug_id: Optional[str] = None
 
 class updateTestcaseStatusResponse(BaseModel):
     id: int
     status: str
+    testing_data: Optional[str] = None
+    bug_id: Optional[str] = None
 
     class Config:
         from_attributes = True
@@ -172,6 +178,8 @@ class getTestcaseDescriptionResponse(BaseModel):
     steps: Optional[str] = None
     expected_result: Optional[str] = None
     priority: Optional[str] = None
+    testing_data: Optional[str] = None
+    bug_id: Optional[str] = None
 
     class Config:
         from_attributes = True

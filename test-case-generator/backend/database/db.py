@@ -44,6 +44,21 @@ def create_tables():
     except Exception:
         pass  # column likely already exists
 
+    # Add testcase execution tracking columns for status popup data
+    try:
+        with engine.connect() as conn:
+            conn.execute(text("ALTER TABLE testcases ADD COLUMN testing_data TEXT"))
+            conn.commit()
+    except Exception:
+        pass  # column likely already exists
+
+    try:
+        with engine.connect() as conn:
+            conn.execute(text("ALTER TABLE testcases ADD COLUMN bug_id TEXT"))
+            conn.commit()
+    except Exception:
+        pass  # column likely already exists
+
 
 def get_table_names():
     """Return list of table names in the database."""

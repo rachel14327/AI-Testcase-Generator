@@ -48,7 +48,7 @@ def process_rag(
     # Use file content from DB, or legacy file_path on disk
     try:
         if doc.file_content:
-            with tempfile.NamedTemporaryFile(suffix=".pdf", delete=False) as tmp:
+            with tempfile.NamedTemporaryFile(suffix=".pdf", delete=False) as tmp: 
                 tmp.write(doc.file_content)
                 file_path = tmp.name
             try:

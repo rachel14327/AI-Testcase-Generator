@@ -180,7 +180,7 @@ export async function getTestcaseDescription(featureId, testcaseId) {
   return res.json()
 }
 
-export async function updateTestcaseStatus(featureId, testcaseId, status) {
+export async function updateTestcaseStatus(featureId, testcaseId, status, testingData = null, bugId = null) {
   const token = getToken()
   const res = await fetch(`${API_BASE}/api/v1/features/${featureId}/testcases/${testcaseId}/status`, {
     method: 'PATCH',
@@ -188,7 +188,11 @@ export async function updateTestcaseStatus(featureId, testcaseId, status) {
       'Content-Type': 'application/json',
       ...(token ? { Authorization: `Bearer ${token}` } : {}),
     },
-    body: JSON.stringify({ status }),
+    body: JSON.stringify({
+      status,
+      testing_data: testingData,
+      bug_id: bugId,
+    }),
   })
   if (!res.ok) {
     const err = await res.json().catch(() => ({ detail: res.statusText }))

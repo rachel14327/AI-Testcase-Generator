@@ -35,6 +35,10 @@ export default function FeatureTestcases() {
   const [editingId, setEditingId] = useState(null)
   const [editingName, setEditingName] = useState('')
   const [savingEdit, setSavingEdit] = useState(false)
+  const [statusModal, setStatusModal] = useState(null)
+  const [testingDataInput, setTestingDataInput] = useState('')
+  const [bugIdInput, setBugIdInput] = useState('')
+  const [statusSaveError, setStatusSaveError] = useState(null)
   const dropdownRef = useRef(null)
   const editInputRef = useRef(null)
 
@@ -85,14 +89,44 @@ export default function FeatureTestcases() {
     }
   }
 
-  async function onUpdateStatus(tcId, status) {
-    setUpdatingId(tcId)
+  function openStatusModal(tcId, status) {
+    const testcase = testcases.find(tc => tc.id === tcId)
     setOpenDropdown(null)
+    setStatusModal({ tcId, status })
+    setTestingDataInput(testcase?.testing_data ?? '')
+    setBugIdInput(testcase?.bug_id ?? '')
+    setStatusSaveError(null)
+  }
+
+  function closeStatusModal() {
+    if (updatingId) return
+    setStatusModal(null)
+    setTestingDataInput('')
+    setBugIdInput('')
+    setStatusSaveError(null)
+  }
+
+  async function onSaveStatus() {
+    if (!statusModal) return
+    const { tcId, status } = statusModal
+    if ((status === 'failed' || status === 'blocked') && !bugIdInput.trim()) {
+      setStatusSaveError('Bug ID is required when status is Failed or Blocked.')
+      return
+    }
+    setUpdatingId(tcId)
     try {
-      await updateTestcaseStatus(featureId, tcId, status)
-      setTestcases(prev => prev.map(tc => tc.id === tcId ? { ...tc, status } : tc))
+      await updateTestcaseStatus(featureId, tcId, status, testingDataInput.trim() || null, bugIdInput.trim() || null)
+      setTestcases(prev => prev.map(tc => tc.id === tcId
+        ? {
+            ...tc,
+            status,
+            testing_data: testingDataInput.trim() || null,
+            bug_id: bugIdInput.trim() || null,
+          }
+        : tc))
+      closeStatusModal()
     } catch (e) {
-      setError(e.message || 'Failed to update status')
+      setStatusSaveError(e.message || 'Failed to update status')
     } finally {
       setUpdatingId(null)
     }
@@ -219,6 +253,52 @@ export default function FeatureTestcases() {
 
       {error && <div className="ftc-error">{error}</div>}
 
+      {statusModal && (
+        <div className="ftc-modal-backdrop" onClick={closeStatusModal}>
+          <div className="ftc-modal" onClick={e => e.stopPropagation()}>
+            <h3 className="ftc-modal-title">Update Test Status</h3>
+            <p className="ftc-modal-subtitle">
+              Status: <strong>{STATUS_OPTIONS.find(s => s.value === statusModal.status)?.label ?? statusModal.status}</strong>
+            </p>
+
+            <label className="ftc-modal-label" htmlFor="testing-data">Testing Data</label>
+            <textarea
+              id="testing-data"
+              className="ftc-modal-textarea"
+              value={testingDataInput}
+              onChange={e => setTestingDataInput(e.target.value)}
+              placeholder="Enter execution details, observations, or notes..."
+              rows={4}
+            />
+
+            {(statusModal.status === 'failed' || statusModal.status === 'blocked') && (
+              <>
+                <label className="ftc-modal-label" htmlFor="bug-id">Bug ID</label>
+                <input
+                  id="bug-id"
+                  className="ftc-modal-input"
+                  value={bugIdInput}
+                  onChange={e => setBugIdInput(e.target.value)}
+                  placeholder="Enter linked bug ID (required)"
+                  autoComplete="off"
+                />
+              </>
+            )}
+
+            {statusSaveError && <div className="ftc-error ftc-modal-error">{statusSaveError}</div>}
+
+            <div className="ftc-modal-actions">
+              <button className="ftc-cancel-btn" type="button" onClick={closeStatusModal} disabled={Boolean(updatingId)}>
+                Cancel
+              </button>
+              <button className="ftc-submit-btn" type="button" onClick={onSaveStatus} disabled={Boolean(updatingId)}>
+                {updatingId ? 'Saving…' : 'Save'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {!loading && total > 0 && (() => {
         const counts = {
           passed:   testcases.filter(tc => (tc.status || 'untested') === 'passed').length,
@@ -265,14 +345,15 @@ export default function FeatureTestcases() {
               <th className="ftc-th ftc-th-id">ID</th>
               <th className="ftc-th">Title</th>
               <th className="ftc-th ftc-th-status">Status</th>
+              <th className="ftc-th ftc-th-testing-data">Testing Data</th>
               <th className="ftc-th ftc-th-actions">Actions</th>
             </tr>
           </thead>
           <tbody>
             {loading ? (
-              <tr><td colSpan={4} className="ftc-td-empty">Loading…</td></tr>
+              <tr><td colSpan={5} className="ftc-td-empty">Loading…</td></tr>
             ) : total === 0 ? (
-              <tr><td colSpan={4} className="ftc-td-empty">No test cases yet. Click "+ Add Test Case" to create one.</td></tr>
+              <tr><td colSpan={5} className="ftc-td-empty">No test cases yet. Click "+ Add Test Case" to create one.</td></tr>
             ) : (
               (() => {
                 const rows = []
@@ -285,7 +366,7 @@ export default function FeatureTestcases() {
                     if (section) {
                       rows.push(
                         <tr key={`section-${section}`} className="ftc-section-row">
-                          <td colSpan={4} className="ftc-section-heading">
+                          <td colSpan={5} className="ftc-section-heading">
                             <div className="ftc-section-heading-inner">
                               {section}
                               <button
@@ -340,6 +421,16 @@ export default function FeatureTestcases() {
                         {updatingId === tc.id ? '…' : statusOpt.label}
                       </span>
                     </td>
+                    <td className="ftc-td ftc-td-testing-data">
+                      {(tc.testing_data || tc.bug_id) ? (
+                        <div className="ftc-testing-meta">
+                          {tc.testing_data && <span className="ftc-testing-data">{tc.testing_data}</span>}
+                          {tc.bug_id && <span className="ftc-bug-id">Bug: {tc.bug_id}</span>}
+                        </div>
+                      ) : (
+                        <span className="ftc-testing-empty">-</span>
+                      )}
+                    </td>
                     <td className="ftc-td ftc-td-actions" ref={openDropdown === tc.id ? dropdownRef : null}>
                       <div className="ftc-action-wrap">
                         <button
@@ -358,7 +449,7 @@ export default function FeatureTestcases() {
                                 key={opt.value}
                                 type="button"
                                 className={`ftc-dropdown-item ftc-dropdown-${opt.color} ${currentStatus === opt.value ? 'active' : ''}`}
-                                onClick={() => onUpdateStatus(tc.id, opt.value)}
+                                onClick={() => openStatusModal(tc.id, opt.value)}
                               >
                                 {opt.label}
                               </button>
