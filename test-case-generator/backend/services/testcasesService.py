@@ -10,7 +10,29 @@ class testcasesService:
 
     def get_feature_testcases(self, user_id: int, feature_id: int):
         feature = self.session.query(Feature).filter(Feature.id == feature_id, Feature.user_id == user_id).first()
-        testcases = self.session.query(Testcase).filter(Testcase.user_id == user_id, Testcase.feature_id == feature_id).all()
+        testcases = (
+            self.session.query(Testcase)
+            .filter(Testcase.user_id == user_id, Testcase.feature_id == feature_id)
+            .order_by(Testcase.id.asc())
+            .all()
+        )
+        if not testcases:
+            return feature, testcases
+
+        # Track the ID of the first test case added to each section, to preserve creation order of sections.
+        section_first_id: dict = {}
+        for tc in testcases:
+            if tc.section not in section_first_id:
+                section_first_id[tc.section] = tc.id
+
+        def _sort_key(tc):
+            # Null-section test cases always float to the top (group 0), ordered by their own id.
+            # Named sections sort after (group 1), ordered by the section's first-ever id, then by test case id.
+            if tc.section is None:
+                return (0, tc.id)
+            return (1, section_first_id[tc.section], tc.id)
+
+        testcases = sorted(testcases, key=_sort_key)
         return feature, testcases
     
     def create_testcase(self, user_id: int, feature_id: int, body: addTestcaseRequest) -> addTestcaseResponse:
