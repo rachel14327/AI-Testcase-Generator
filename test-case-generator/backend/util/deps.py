@@ -2,7 +2,7 @@ from typing import Annotated, Union
 from fastapi import Depends, Header, HTTPException, status
 from sqlalchemy.orm import Session
 from core.security.authHelper import AuthHelper
-from database.db import get_db
+from database.db import SessionLocal, get_db
 from model.schemas import UserResponse
 from services.userService import userService
 
@@ -44,3 +44,15 @@ def get_user_by_id(user_id : int, session: Session = Depends(get_db)) -> UserRes
     if user:
         return user
     raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")         
+
+
+def get_db():
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
+
+
+DB = Annotated[Session, Depends(get_db)]
+Current_user = Annotated[UserResponse, Depends(get_current_user)]
